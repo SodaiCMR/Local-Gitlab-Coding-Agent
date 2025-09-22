@@ -1,22 +1,52 @@
 from fastapi import FastAPI
 import ollama
 import sys
-from functions.get_files_info import get_files_info
-
+from functions.get_files_info import  get_files_info
 app = FastAPI()
 @app.post("/generate")
 def generate():
-    messages = []
     verbose_flag = False
+    messages = []
+    system_prompt = {
+        "role": "system",
+        "content": """
+    You are a helpful AI coding agent.
+
+    When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
+
+    - List files and directories
+
+    All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+    """
+    }
+
+    available_functions = {
+        'get_files_info':get_files_info,
+    }
+
+    messages.append(system_prompt)
     if len(sys.argv) < 2:
         print("Prompt missing !")
         sys.exit(1)
     if len(sys.argv) == 3 and sys.argv[2] == "--verbose":
         verbose_flag = True
+
     msg = {"role":"user", "content":sys.argv[1]}
     messages.append(msg)
-    response = ollama.chat(model="mistral", messages=messages)
-    print(response['message']['content'])
+    response = ollama.chat(
+        model="mistral",
+        messages=messages,
+        tools=[get_files_info],
+    )
+
+    for tool in response.message.tool_calls or []:
+        function_to_call = available_functions.get(tool.function.name)
+        if function_to_call:
+            # print('Function output:', function_to_call(**tool.function.arguments))
+            print(f'calling function: {tool.function.name}({tool.function.arguments})')
+        else:
+            print(response['message']['content'])
+
 
     if verbose_flag:
         print("\n")
@@ -25,5 +55,5 @@ def generate():
         print(f"Response tokens: {response['eval_count']}")
 
 if __name__ == "__main__":
-    # generate()
-    print(get_files_info("calculator","pkg"))
+    generate()
+    # print(get_files_info("calculator","pkg"))

@@ -3,6 +3,12 @@ import os.path
 MAX_CHARS = 20_000
 
 def get_file_content(working_directory, file_path):
+    """
+
+    :param working_directory:
+    :param file_path:
+    :return:
+    """
     abs_work_dir = os.path.abspath(working_directory)
     abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))
 
