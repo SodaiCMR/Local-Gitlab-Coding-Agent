@@ -3,6 +3,16 @@ import subprocess
 
 # TODO update the run function to execute more than python files
 def run_python_file(working_directory, file_path, args=[]):
+    """
+    runs a python file with the python interpreter, accepts additional CLI args as optional array
+
+    Args:
+        working_directory (str): The based directory in which to search.
+        file_path (str): The file to run, relative to the current directory.
+        args (list): an optional list of strings to be used as the CLI args for the python file
+    Returns:
+        str: The output or the errors after running the file.
+    """
     abs_work_dir = os.path.abspath(working_directory)
     abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))
 
