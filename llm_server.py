@@ -24,7 +24,7 @@ def generate():
     - Execute Python files with optional arguments
     - Write or overwrite files
     
-    All paths you provide should be relative to the working directory. You do not have to specify the working directory in your function calls as it is automatically injected for security reasons.
+    All paths you provide should be relative to the working directory. You should never provide the working directory in your function calls as it is automatically injected for security reasons !
     """
     }
 
@@ -56,10 +56,10 @@ def generate():
     for tool in response.message.tool_calls:
         function_to_call = available_functions.get(tool.function.name)
         if function_to_call:
-            print(f'calling function: {tool.function.name}({tool.function.arguments})')
-        #     print(call_function(tool, verbose_flag))
-        # else:
-        #     print(response.message.content)
+            # print(f'calling function: {tool.function.name}({tool.function.arguments})')
+            print(call_function(tool, verbose_flag))
+        else:
+            print(response.message.content)
 
 
     if verbose_flag:

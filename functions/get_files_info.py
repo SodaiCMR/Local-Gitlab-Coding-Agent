@@ -1,18 +1,18 @@
 import os.path
 
-def get_files_info(working_directory, directory="."):
+def get_files_info(_working_directory, directory="."):
     """
     Lists files in the specified directory along with their sizes, constrained to the working directory.
 
     Args:
-        working_directory (str): The based directory in which to search (you should not provide it).
+        _working_directory (str): (For internal use only, do not set manually).
         directory (str): The directory to list files from, relative to the working directory. If not provided,
         lists files in the working directory itself.
     Returns:
         str: The list of the files and directories in the specified directory along with their sizes, constrained to the working directory.
     """
-    abs_working_dir = os.path.abspath(working_directory)
-    abs_dir = os.path.abspath(str(os.path.join(working_directory, directory)))
+    abs_working_dir = os.path.abspath(_working_directory)
+    abs_dir = os.path.abspath(str(os.path.join(_working_directory, directory)))
     if not abs_dir.startswith(abs_working_dir):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 

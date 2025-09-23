@@ -1,19 +1,19 @@
 import os.path
 
-def write_file(working_directory, file_path, content):
+def write_file(_working_directory, file_path, content):
     """
     Overwrites an existing file or writes to a new file if it doesn't exist (and create required parent dirs safely),
     constrained to the current working directory
 
     Args:
-        working_directory (str): The based directory in which to search (you don't have to provide it).
+        _working_directory (str): (For internal use only, do not set manually).
         file_path (str): The path of the file in which we should write
         content (str): The content to be written in the file
     Returns:
         The error or the message confirming that the content has been successfully written
     """
-    abs_work_dir = os.path.abspath(working_directory)
-    abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))
+    abs_work_dir = os.path.abspath(_working_directory)
+    abs_file_path = os.path.abspath(str(os.path.join(_working_directory, file_path)))
 
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot write to "{file_path}" as it is outside the permitted working directory'

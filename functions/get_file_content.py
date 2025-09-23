@@ -2,17 +2,17 @@ import os.path
 # TODO Test the max_chars limit
 MAX_CHARS = 20_000
 
-def get_file_content(working_directory, file_path):
+def get_file_content(_working_directory, file_path):
     """
     Reads the content of the given file as a string, constrained to the working directory
     Args:
-        working_directory (str): The based directory in which to search (you don't have to provide it).
+        _working_directory (str): (For internal use only, do not set manually).
         file_path (str): The file path to the file from the working directory.
     Returns:
         str: what is inside the given file
     """
-    abs_work_dir = os.path.abspath(working_directory)
-    abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))
+    abs_work_dir = os.path.abspath(_working_directory)
+    abs_file_path = os.path.abspath(str(os.path.join(_working_directory, file_path)))
 
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'

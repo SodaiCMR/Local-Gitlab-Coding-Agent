@@ -2,19 +2,19 @@ import os
 import subprocess
 
 # TODO update the run function to execute more than python files
-def run_python_file(working_directory, file_path, args=[]):
+def run_python_file(_working_directory, file_path, args: list[str]=[]):
     """
-    runs a python file with the python interpreter, accepts additional CLI args as optional array
+    Runs a python file with the python interpreter, accepts additional CLI args as optional list
 
     Args:
-        working_directory (str): The based directory in which to search (you do not have to provide it).
+        _working_directory (str): (For internal use only, do not set manually).
         file_path (str): The file to run, relative to the current directory.
-        args (list): an optional list of strings to be used as the CLI args for the python file
+        args (list[str]): an optional list of strings to be used as the CLI args for the python file.
     Returns:
         str: The output or the errors after running the file.
     """
-    abs_work_dir = os.path.abspath(working_directory)
-    abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))
+    abs_work_dir = os.path.abspath(_working_directory)
+    abs_file_path = os.path.abspath(str(os.path.join(_working_directory, file_path)))
 
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
