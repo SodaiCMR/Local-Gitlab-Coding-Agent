@@ -6,7 +6,7 @@ def write_file(working_directory, file_path, content):
     constrained to the current working directory
 
     Args:
-        working_directory (str): The based directory in which to search.
+        working_directory (str): The based directory in which to search (you don't have to provide it).
         file_path (str): The path of the file in which we should write
         content (str): The content to be written in the file
     Returns:

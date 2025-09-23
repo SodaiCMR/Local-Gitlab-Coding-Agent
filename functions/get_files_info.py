@@ -5,9 +5,9 @@ def get_files_info(working_directory, directory="."):
     Lists files in the specified directory along with their sizes, constrained to the working directory.
 
     Args:
-        working_directory (str): The based directory in which to search.
+        working_directory (str): The based directory in which to search (you should not provide it).
         directory (str): The directory to list files from, relative to the working directory. If not provided,
-         lists files in the working directory itself.
+        lists files in the working directory itself.
     Returns:
         str: The list of the files and directories in the specified directory along with their sizes, constrained to the working directory.
     """

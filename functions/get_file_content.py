@@ -6,7 +6,7 @@ def get_file_content(working_directory, file_path):
     """
     Reads the content of the given file as a string, constrained to the working directory
     Args:
-        working_directory (str): The based directory in which to search.
+        working_directory (str): The based directory in which to search (you don't have to provide it).
         file_path (str): The file path to the file from the working directory.
     Returns:
         str: what is inside the given file

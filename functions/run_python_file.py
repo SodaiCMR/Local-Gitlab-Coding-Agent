@@ -7,7 +7,7 @@ def run_python_file(working_directory, file_path, args=[]):
     runs a python file with the python interpreter, accepts additional CLI args as optional array
 
     Args:
-        working_directory (str): The based directory in which to search.
+        working_directory (str): The based directory in which to search (you do not have to provide it).
         file_path (str): The file to run, relative to the current directory.
         args (list): an optional list of strings to be used as the CLI args for the python file
     Returns:
