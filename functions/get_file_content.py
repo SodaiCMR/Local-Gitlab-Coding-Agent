@@ -9,7 +9,7 @@ def get_file_content(working_directory, file_path):
         working_directory (str): The based directory in which to search.
         file_path (str): The file path to the file from the working directory.
     Returns:
-        str: The content of the given file as a string, constrained to the working directory.
+        str: what is inside the given file
     """
     abs_work_dir = os.path.abspath(working_directory)
     abs_file_path = os.path.abspath(str(os.path.join(working_directory, file_path)))

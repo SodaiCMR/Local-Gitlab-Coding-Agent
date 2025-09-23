@@ -44,7 +44,7 @@ def generate():
     msg = {"role":"user", "content":sys.argv[1]}
     messages.append(msg)
     response = ollama.chat(
-        model="mistral",
+        model="qwen2.5",
         messages=messages,
         tools=[get_files_info,get_file_content,run_python_file,write_file],
     )
@@ -66,4 +66,3 @@ def generate():
 
 if __name__ == "__main__":
     generate()
-    # print(get_files_info("calculator","pkg"))
