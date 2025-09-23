@@ -5,6 +5,7 @@ from functions.get_files_info import  get_files_info
 from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
+from functions.call_function import call_function
 
 app = FastAPI()
 @app.post("/generate")
@@ -49,13 +50,15 @@ def generate():
         tools=[get_files_info,get_file_content,run_python_file,write_file],
     )
 
-    for tool in response.message.tool_calls or []:
+    if response.message.tool_calls is None:
+        print('Response is malformed')
+        return
+    for tool in response.message.tool_calls:
         function_to_call = available_functions.get(tool.function.name)
         if function_to_call:
-            # print('Function output:', function_to_call(**tool.function.arguments))
-            print(f'calling function: {tool.function.name}({tool.function.arguments})')
+            print(call_function(tool, verbose_flag))
         else:
-            print(response['message']['content'])
+            print(response.message.content)
 
 
     if verbose_flag:
