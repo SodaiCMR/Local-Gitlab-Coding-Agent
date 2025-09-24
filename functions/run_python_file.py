@@ -14,7 +14,7 @@ def run_python_file(_working_directory, file_path, args: list[str]=[]):
         str: The output or the errors after running the file.
     """
     abs_work_dir = os.path.abspath(_working_directory)
-    abs_file_path = os.path.abspath(str(os.path.join(_working_directory, file_path)))
+    abs_file_path = os.path.abspath(os.path.join(_working_directory, file_path))
 
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'

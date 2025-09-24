@@ -12,13 +12,13 @@ def get_file_content(_working_directory, file_path):
         str: what is inside the given file
     """
     abs_work_dir = os.path.abspath(_working_directory)
-    abs_file_path = os.path.abspath(str(os.path.join(_working_directory, file_path)))
+    abs_file_path = os.path.abspath(os.path.join(_working_directory, file_path))
 
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
 
     if not os.path.isfile(abs_file_path):
-        return f'Error: File not found or is not a regular file: "{file_path}"'
+        return f'Error: File not found in the current directory or is not a regular file: "{file_path}"'
 
     file_content_string = ""
     try:

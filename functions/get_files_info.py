@@ -12,9 +12,12 @@ def get_files_info(_working_directory, directory="."):
         str: The list of the files and directories in the specified directory along with their sizes, constrained to the working directory.
     """
     abs_working_dir = os.path.abspath(_working_directory)
-    abs_dir = os.path.abspath(str(os.path.join(_working_directory, directory)))
+    abs_dir = os.path.abspath(os.path.join(_working_directory, directory))
     if not abs_dir.startswith(abs_working_dir):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
+
+    if not os.path.isdir(abs_dir):
+        return f'Error: Directory not found or is not a regular directory: "{abs_dir}"'
 
     final_response = ""
     contents = os.listdir(abs_dir)

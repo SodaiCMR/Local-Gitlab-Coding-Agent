@@ -6,7 +6,7 @@ from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
 from functions.call_function import call_function
-
+max_iters = 20
 app = FastAPI()
 @app.post("/generate")
 def generate():
@@ -25,14 +25,9 @@ def generate():
     - Write or overwrite files
     
     All paths you provide should be relative to the working directory. You should never provide the working directory in your function calls as it is automatically injected for security reasons !
+    IMPORTANT: Only call tools when absolutely necessary to perform an action you cannot do from the model alone. 
+    If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool
     """
-    }
-
-    available_functions = {
-        'get_files_info':get_files_info,
-        'get_file_content':get_file_content,
-        'run_python_file':run_python_file,
-        'write_file':write_file,
     }
 
     messages.append(system_prompt)
@@ -44,29 +39,38 @@ def generate():
 
     msg = {"role":"user", "content":sys.argv[1]}
     messages.append(msg)
-    response = ollama.chat(
-        model="qwen2.5",
-        messages=messages,
-        tools=[get_files_info,get_file_content,run_python_file,write_file],
-    )
 
-    if response.message.tool_calls is None:
-        print('Response is malformed')
-        return
-    for tool in response.message.tool_calls:
-        function_to_call = available_functions.get(tool.function.name)
-        if function_to_call:
-            # print(f'calling function: {tool.function.name}({tool.function.arguments})')
-            print(call_function(tool, verbose_flag))
+    for iter in range(max_iters):
+        response = ollama.chat(
+            model="qwen2.5",
+            messages=messages,
+            tools=[get_files_info,get_file_content,run_python_file,write_file],
+        )
+
+        if response is None:
+            print('Response is malformed')
+            return
+
+        if response.message.tool_calls:
+            for tool in response.message.tool_calls:
+                content = getattr(response.message, "content", None)
+                if content and str(content).strip():
+                    messages.append({"role":"assistant", "content":content})
+
+                function_output = call_function(tool, verbose_flag)
+                tool_msg = {"role":"tool", "content":function_output}
+                messages.append(tool_msg)
+                # print(function_output)
+                # print(tool_msg)
+
+            # if verbose_flag:
+            #     print("\n")
+            #     print(f"User prompt: {msg['content']}")
+            #     print(f"Prompt tokens: {response.prompt_eval_count}")
+            #     print(f"Response tokens: {response.eval_count}")
         else:
             print(response.message.content)
-
-
-    if verbose_flag:
-        print("\n")
-        print(f"User prompt: {msg['content']}")
-        print(f"Prompt tokens: {response['prompt_eval_count']}")
-        print(f"Response tokens: {response['eval_count']}")
+            return
 
 if __name__ == "__main__":
     generate()
