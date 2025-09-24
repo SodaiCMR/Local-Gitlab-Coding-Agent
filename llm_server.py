@@ -45,7 +45,10 @@ def generate():
         msg = {"role":"user", "content":user_input}
         messages.append(msg)
 
-        for iter in range(max_iters):
+        for _ in range(max_iters + 1):
+            if _ == max_iters:
+                print(f'Reached the maximum number of iterations {max_iters}')
+                break
             response = ollama.chat(
                 model="qwen2.5",
                 messages=messages,
