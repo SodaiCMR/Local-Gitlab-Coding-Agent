@@ -72,5 +72,8 @@ def generate():
             print(response.message.content)
             return
 
+    print(f"Reached the maximum number of iterations: {max_iters} !....")
+    return
+
 if __name__ == "__main__":
     generate()

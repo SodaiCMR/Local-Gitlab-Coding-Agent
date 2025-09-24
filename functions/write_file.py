@@ -15,6 +15,9 @@ def write_file(_working_directory, file_path, content):
     abs_work_dir = os.path.abspath(_working_directory)
     abs_file_path = os.path.abspath(os.path.join(_working_directory, file_path))
 
+    if not os.path.exists(abs_file_path):
+        return f'Error: File "{file_path}" does not exist or not found in the current directory.'
+
     if not abs_file_path.startswith(abs_work_dir):
         return f'Error: Cannot write to "{file_path}" as it is outside the permitted working directory'
 
