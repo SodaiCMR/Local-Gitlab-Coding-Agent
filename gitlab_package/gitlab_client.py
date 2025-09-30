@@ -14,8 +14,17 @@ class GitlabClient:
         issues = self.project.issues.list(all=True, state='opened', labels='ai:agent')
         return issues
 
-    def get_project_merge_requests(self):
-        return self.project.mergerequests.list(all=True, state='opened')
+    def create_merge_request(self):
+        # mr_description_template = project.merge_request_templates.get("default")
+        merge_request = self.project.mergerequests.create(
+            {
+                'source_branch': '',
+                'target_branch': 'main',
+                'title': "issue_fix",
+                'labels': ['ai:agent'],
+                # 'description': mr_description_template.content
+            }
+        )
 
 def look_for_issues(client):
     #TODO take the time in consideration
