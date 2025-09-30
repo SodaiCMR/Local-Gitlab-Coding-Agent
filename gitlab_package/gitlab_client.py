@@ -1,7 +1,7 @@
 import gitlab
 import logging
 import time
-from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
+from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 
 class GitlabClient:
     def __init__(self):
@@ -23,13 +23,11 @@ def look_for_issues(client):
     issues = client.get_project_issues()
     for issue in issues:
         issue_details =f"title: {issue.title}, description: {issue.description}".strip()
-        print(issue_details)
-    print("\n")
-    # [print(issue.description) for issue in issues]
+        return issue_details
 
-if __name__ == "__main__":
-    client = GitlabClient()
-    while True:
-        look_for_issues(client)
+# if __name__ == "__main__":
+#     client = GitlabClient()
+#     while True:
+#         look_for_issues(client)
 
 # look_for_issues(client)

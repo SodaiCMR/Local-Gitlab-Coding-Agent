@@ -6,9 +6,12 @@ from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
 from functions.call_function import call_function
+from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 
 max_iters = 20 #TODO check the max number of iterations
 app = FastAPI()
+client = GitlabClient()
+
 @app.post("/generate")
 def generate():
     verbose_flag = False
@@ -16,7 +19,10 @@ def generate():
     system_prompt = {
         "role": "system",
         "content": """
-    You are a helpful AI coding agent. when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
+    You are a helpful AI coding agent.
+    You help to answer to gitlab issues; they are phrased based on two key points: the issue's title and it's description,
+    therefore you need to answer the question based on that. 
+    when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
 
     When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
 
@@ -36,47 +42,43 @@ def generate():
     if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
         verbose_flag = True
 
-    print("ask a question: ")
-    while True:
-        user_input = input("> ").strip()
-        if not user_input:
-            continue
-        if user_input == "/exit":
+    user_input = look_for_issues(client)
+    # print("ask a question: ")
+    # while True:
+    # user_input = input("> ").strip()
+    # if not user_input:
+    #     continue
+    # if user_input == "/exit":
+    #     break
+    msg = {"role":"user", "content":user_input}
+    messages.append(msg)
+    for _ in range(max_iters + 1):
+        if _ == max_iters:
+            print(f'Reached the maximum number of iterations {max_iters}')
             break
-        msg = {"role":"user", "content":user_input}
-        messages.append(msg)
-
-        for _ in range(max_iters + 1):
-            if _ == max_iters:
-                print(f'Reached the maximum number of iterations {max_iters}')
-                break
-            response = ollama.chat(
-                model="qwen2.5",
-                messages=messages,
-                tools=[get_files_info, get_file_content, run_python_file, write_file],
-            )
-
-            if response is None:
-                print('Response is malformed')
-                break
-
-            if response.message.tool_calls:
-                for tool in response.message.tool_calls:
-                    content = getattr(response.message, "content", None)
-                    if content and str(content).strip():
-                        messages.append({"role": "assistant", "content": content})
-
-                    function_output = call_function(tool, verbose_flag)
-                    tool_msg = {"role": "tool", "content": function_output}
-                    messages.append(tool_msg)
-
-                # if verbose_flag:
-                #     print(f"User prompt: {msg['content']}")
-                #     print(f"Prompt tokens: {response.prompt_eval_count}")
-                #     print(f"Response tokens: {response.eval_count}")
-            else:
-                print(response.message.content)
-                break
+        response = ollama.chat(
+            model="qwen2.5",
+            messages=messages,
+            tools=[get_files_info, get_file_content, run_python_file, write_file],
+        )
+        if response is None:
+            print('Response is malformed')
+            break
+        if response.message.tool_calls:
+            for tool in response.message.tool_calls:
+                content = getattr(response.message, "content", None)
+                if content and str(content).strip():
+                    messages.append({"role": "assistant", "content": content})
+                function_output = call_function(tool, verbose_flag)
+                tool_msg = {"role": "tool", "content": function_output}
+                messages.append(tool_msg)
+            # if verbose_flag:
+            #     print(f"User prompt: {msg['content']}")
+            #     print(f"Prompt tokens: {response.prompt_eval_count}")
+            #     print(f"Response tokens: {response.eval_count}")
+        else:
+            print(response.message.content)
+            break
     return
 
 
