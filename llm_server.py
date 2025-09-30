@@ -6,7 +6,8 @@ from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
 from functions.call_function import call_function
-max_iters = 20
+
+max_iters = 20 #TODO check the max number of iterations
 app = FastAPI()
 @app.post("/generate")
 def generate():
