@@ -1,4 +1,4 @@
-import os.path
+from pathlib import Path
 
 def get_files_info(_working_directory, directory="."):
     """
@@ -11,21 +11,21 @@ def get_files_info(_working_directory, directory="."):
     Returns:
         str: The list of the files and directories in the specified directory along with their sizes, constrained to the working directory.
     """
-    abs_working_dir = os.path.abspath(_working_directory)
-    abs_dir = os.path.abspath(os.path.join(_working_directory, directory))
+    abs_working_dir = Path(_working_directory).resolve()
+    abs_dir = abs_working_dir / Path(directory)
 
-    if not os.path.isdir(abs_dir):
+    if not abs_dir.is_dir():
         return f'Error: Directory not found or is not a regular directory: "{abs_dir}"'
 
-    if not abs_dir.startswith(abs_working_dir):
+    if not str(abs_dir).startswith(str(abs_working_dir)):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 
     final_response = ""
-    contents = os.listdir(abs_dir)
-    for content in contents:
-        content_path = os.path.join(abs_dir, content)
-        is_dir = os.path.isdir(content_path)
-        file_size = os.path.getsize(content_path)
-        final_response += f"- {content}: file_size={file_size} bytes, is_dir={is_dir}\n"
+    for entry in abs_dir.rglob("*"):
+        if entry.name == "__pycache__" or entry.parent.name == "__pycache__": #TODO check for folders to exclude
+            continue
+        entry_rel_path = entry.relative_to(abs_working_dir)
+        entry_is_dir = entry.is_dir()
+        entry_size = entry.stat().st_size
+        final_response += f"- {entry_rel_path}: file_size={entry_size} bytes, is_dir={entry_is_dir}\n"
     return final_response
-

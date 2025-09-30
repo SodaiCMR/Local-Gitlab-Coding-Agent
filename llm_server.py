@@ -15,8 +15,7 @@ def generate():
     system_prompt = {
         "role": "system",
         "content": """
-    You are a helpful AI coding agent. when a user ask questions about a project 
-    you should first try to understand what is inside the project
+    You are a helpful AI coding agent. when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
 
     When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
 
@@ -25,7 +24,8 @@ def generate():
     - Execute Python files with optional arguments
     - Write or overwrite files
     
-    All paths you provide should be relative to the working directory. You should never provide the working directory in your function calls as it is automatically injected for security reasons !
+    All paths you provide should be relative to the working directory.
+    You should never provide the working directory in your function calls as it is automatically injected for security reasons !
     IMPORTANT: Only call tools when absolutely necessary to perform an action you cannot do from the model alone. 
     If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool
     """
