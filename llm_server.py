@@ -41,16 +41,15 @@ def generate():
 
     if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
         verbose_flag = True
-
-    user_input = look_for_issues(client)
+    issue = look_for_issues(client)
     # print("ask a question: ")
     # while True:
     # user_input = input("> ").strip()
     # if not user_input:
-    #     continue
+    # #     continue
     # if user_input == "/exit":
-    #     break
-    msg = {"role":"user", "content":user_input}
+    #     return
+    msg = {"role":"user", "content":issue[1]}
     messages.append(msg)
     for _ in range(max_iters + 1):
         if _ == max_iters:
@@ -59,7 +58,13 @@ def generate():
         response = ollama.chat(
             model="qwen2.5",
             messages=messages,
-            tools=[get_files_info, get_file_content, run_python_file, write_file],
+            tools=[
+                get_files_info,
+                get_file_content,
+                run_python_file,
+                write_file,
+                client.agent_fix_issue,
+            ],
         )
         if response is None:
             print('Response is malformed')
@@ -69,9 +74,12 @@ def generate():
                 content = getattr(response.message, "content", None)
                 if content and str(content).strip():
                     messages.append({"role": "assistant", "content": content})
+                if tool.function.name == "agent_fix_issue":
+                    client.agent_fix_issue(messages, **tool.function.arguments)
                 function_output = call_function(tool, verbose_flag)
                 tool_msg = {"role": "tool", "content": function_output}
                 messages.append(tool_msg)
+                print(response.message.content)
             # if verbose_flag:
             #     print(f"User prompt: {msg['content']}")
             #     print(f"Prompt tokens: {response.prompt_eval_count}")
