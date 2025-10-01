@@ -11,21 +11,19 @@ class GitlabClient:
         self.project = self.gl.projects.get(int(GITLAB_PROJECT_ID))
         logging.info(f"connected to GitLab project {GITLAB_PROJECT_ID}")
 
-    def get_project_issues(self):
-        issues = self.project.issues.list(all=True, state='opened', labels='ai:agent')
+    def get_ai_agent_issues(self):
+        issues = self.project.issues.list(state='opened', labels='ai:agent')
         return issues
 
     def create_merge_request(self):
-        # mr_description_template = project.merge_request_templates.get("default")
-        merge_request = self.project.mergerequests.create(
-            {
-                'source_branch': 'ai_branch',
-                'target_branch': 'main',
-                'title': "issue_fix",
-                'labels': ['ai:agent'],
-                # 'description': mr_description_template.content
-            }
-        )
+        data = {
+            'source_branch': 'ai_branch',
+            'target_branch': 'main',
+            'title': "issue_fix",
+            'labels': ['ai:agent'],
+            'description': f'closes #{look_for_issues(self)}',
+        }
+        self.project.mergerequests.create(data)
 
     def create_commit(self):
         data = {
@@ -35,7 +33,7 @@ class GitlabClient:
                 {
                     'action': 'create',
                     'file_path': 'hello.py',
-                    'content': 'print("hello, world")\n'
+                    'content': 'print("hello, world")\n',
                 }
             ]
         }
@@ -44,18 +42,22 @@ class GitlabClient:
 
 def look_for_issues(client):
     #TODO take the time in consideration
+    # Only the first issue
     # time.sleep(2)
-    issues = client.get_project_issues()
-    for issue in issues:
-        issue_details =f"title: {issue.title}, description: {issue.description}".strip()
-        return issue_details
+    issues = client.get_ai_agent_issues()
+    return issues[0].iid
+    # for issue in issues:
+    #     issue_details = f"title: {issue.title}, description: {issue.description}".strip()
+    #     issue_iids = i
+    #     return issue_details
+        # return issue.iid
 
 if __name__ == "__main__":
     client = GitlabClient()
+    # print(look_for_issues(client))
     # client.create_commit()
-    print(client.project.commits.list(ref_name='ai_branch',get_all=True))
-    # client.create_merge_request()
+    # print(client.project.commits.list(ref_name='ai_branch',get_all=True))
+    client.create_merge_request()
 #     while True:
 #         look_for_issues(client)
 
-# look_for_issues(client)
