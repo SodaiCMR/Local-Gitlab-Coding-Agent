@@ -30,7 +30,7 @@ class GitlabClient:
         }
         try:
             self.project.mergerequests.create(data)
-            return f'created merge request for {found_issue_id}'
+            return f'Successfully created the merge request for issue#{found_issue_id}'
         except Exception as e:
             return f'Error: {e} occurred'
 
@@ -48,7 +48,7 @@ class GitlabClient:
         }
         try:
             self.project.commits.create(data)
-            return f'{commit_message}'
+            return f'successfully {commit_message}'
         except Exception as e:
             return f'Error: {e} occurred'
 
@@ -67,7 +67,7 @@ class GitlabClient:
             self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
         return 'ai_branch is now up to date!'
 
-    def agent_fix_issue(self, issue_id, commit_messages: list[str], action: str,  file_path: str, content: str, ):
+    def agent_fix_issue(self, issue_id, commit_messages: list[str], action: str,  file_path: str, content: str):
         """
             Automatically fixes a GitLab issue.
 
@@ -83,11 +83,12 @@ class GitlabClient:
 
             Returns:
                 str: A message indicating whether the merge request was successfully created.
-    """
+        """
         self.update_ai_branch()
         for commit_message in commit_messages:
             self.create_commit(action, commit_message, file_path, content)
-        return self.create_merge_request(issue_id)
+        mr = self.create_merge_request(issue_id)
+        return mr
 
     def agent_comment_issue(self, issue_id: int, content: str):
         """
@@ -148,7 +149,7 @@ class GitlabClient:
         content = base64.b64decode(repo_file.content)
         return content.decode('utf-8')
 
-    def write_repo_file(self):
+    def write_repo_file(self, file_path:str):
         pass
 
     def run_repo_file(self):
@@ -166,6 +167,6 @@ def look_for_issues(client):
     except Exception as e:
         return f'Error: {e} occurred'
 
-if __name__ == "__main__":
-    client = GitlabClient()
-    print(client.get_repo_file_content('calculator/main.py'))
+# if __name__ == "__main__":
+#     client = GitlabClient()
+#     client.create_commit('delete', 'delete hello.py', 'calculator/hello.py', '')

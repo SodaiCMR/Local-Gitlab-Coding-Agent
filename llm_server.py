@@ -17,8 +17,8 @@ def generate():
         "content": """
     You are a helpful AI coding agent.
     You help to fix the gitlab issues;
-    they are phrased based on three key points: the issue's title, it's description and it's id.
-    when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
+    they are phrased based on three key points: the issue's title, its description and its id.
+    when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project.
 
     When fixing a GitLab issue, follow this workflow:
         
@@ -26,7 +26,7 @@ def generate():
             If the issue concerns retrieving repository information:
                 - If the issue is about a folder (directory structure):
                     - Use the corresponding function to list the contents of the folder
-                - If th issue is about a file (its content):
+                - If the issue is about a file (its content):
                     - Use the corresponding function to fetch and decode the file content
             Then Post the result back to the issue
                 - After retrieving the required information, always the call to add comment to the issue's discussion
@@ -37,10 +37,8 @@ def generate():
                 - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
                 - After all commits are created, open a merge request targeting the default branch and link it to the issue.
                 - Ensure that commit messages are meaningful and related to the issue.
-                - The final goal is to provide a merge request that fixes the assigned issue.
+                - The final goal is to provide only one merge request that fixes the assigned issue.
     
-    All paths you provide should be relative to the working directory.
-    You should never provide the working directory in your function calls as it is automatically injected for security reasons !
     IMPORTANT: Only call tools when absolutely necessary to perform an action you cannot do from the model alone. 
     If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool
     """
@@ -52,6 +50,7 @@ def generate():
     issue = look_for_issues(client)
     msg = {"role":"user", "content":issue}
     messages.append(msg)
+
     for _ in range(max_iters + 1):
         if _ == max_iters:
             print(f'Reached the maximum number of iterations {max_iters}')
@@ -85,7 +84,6 @@ def generate():
             print(response.message.content)
             break
     return
-
 
 if __name__ == "__main__":
     generate()
