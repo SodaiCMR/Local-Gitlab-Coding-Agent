@@ -22,10 +22,15 @@ def generate():
 
     When fixing a GitLab issue, follow this workflow:
         
-        Fist understand what the issue is about:
+        First understand what the issue is about:
             If the issue concerns retrieving repository information:
-                - You will first get the information from the repository
-                - Then Add comment to the issue's discussion in the repository
+                - If the issue is about a folder (directory structure):
+                    - Use the corresponding function to list the contents of the folder
+                - If th issue is about a file (its content):
+                    - Use the corresponding function to fetch and decode the file content
+            Then Post the result back to the issue
+                - After retrieving the required information, always the call to add comment to the issue's discussion
+            
             Else:
                 - Always work on the branch 'ai_branch'. If it does not exist, create it from the default branch.
                 - For each modification, create a commit with a clear and concise message describing the change.
@@ -58,6 +63,7 @@ def generate():
                 client.agent_fix_issue,
                 client.get_repo_info,
                 client.agent_comment_issue,
+                client.get_repo_file_content,
             ],
         )
         if response is None:

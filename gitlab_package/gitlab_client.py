@@ -4,6 +4,7 @@ import time
 from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 # from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
+import base64
 
 class GitlabClient:
     def __init__(self):
@@ -91,7 +92,8 @@ class GitlabClient:
     def agent_comment_issue(self, issue_id: int, content: str):
         """
             Add comment to an issue discussion.
-            The agent add a comment to an issue when the issue details specify the need to get infos from the repository
+            The agent add a comment to an issue when the issue details specify the need to
+            whether getting infos or getting file content from the repository
 
         Args:
             issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
@@ -107,7 +109,7 @@ class GitlabClient:
         except Exception as e:
             return f'Error: {e} occurred'
 
-    def get_repo_info(self, path:str='.'):#TODO Check folder that need to be exlcuded
+    def get_repo_info(self, path:str='.'):#TODO Check folder that need to be excluded
         """
            Lists all the items in the specified directory, inside the repository.
 
@@ -118,17 +120,33 @@ class GitlabClient:
                str: The list of the files and directories in the specified directory inside the repository.
         """
         repo_infos = ''
-        items = self.project.repository_tree(path=path)
-        for item in items:
-            if item['type'] == 'tree':
-                repo_infos += f"- {item['path']}: is_dir= True\n"
-                repo_infos += self.get_repo_info(path=item['path'])
-            elif item['type'] == 'blob':
-                repo_infos += f"- {item['path']}: is_dir= False\n"
+        try:
+            items = self.project.repository_tree(path=path)
+            for item in items:
+                if item['type'] == 'tree':
+                    repo_infos += f"- {item['path']}: is_dir= True\n"
+                    repo_infos += self.get_repo_info(path=item['path'])
+                elif item['type'] == 'blob':
+                    repo_infos += f"- {item['path']}: is_dir= False\n"
+        except Exception as e:
+            return f'Error: {e} occurred'
+
         return repo_infos
 
-    def get_repo_files_content(self):
-        pass
+    def get_repo_file_content(self, file_path:str):
+        """
+            Reads the content of the given file as a string.
+            Args:
+                file_path (str): The file path to the file in the repository.
+            Returns:
+                str: what is inside the given file path
+            """
+        try:
+            repo_file = self.project.files.get(file_path=file_path, ref='main')
+        except:
+            repo_file = self.project.files.get(file_path=file_path, ref='master')
+        content = base64.b64decode(repo_file.content)
+        return content.decode('utf-8')
 
     def write_repo_file(self):
         pass
@@ -150,4 +168,4 @@ def look_for_issues(client):
 
 if __name__ == "__main__":
     client = GitlabClient()
-    # client.agent_comment_issue(5, 'Of course ! WHO THE HELL do you think I am .... ')
+    print(client.get_repo_file_content('calculator/main.py'))

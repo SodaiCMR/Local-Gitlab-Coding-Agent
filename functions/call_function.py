@@ -1,4 +1,3 @@
-from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
 def call_function(client, tool, verbose=False):
@@ -9,8 +8,6 @@ def call_function(client, tool, verbose=False):
 
     result = ""
     match tool.function.name:
-        # case "get_file_content":
-        #     result = get_file_content(working_directory, **tool.function.arguments)
         # case "run_python_file":
         #     result = run_python_file(working_directory, **tool.function.arguments)
         # case "write_file":
@@ -21,6 +18,8 @@ def call_function(client, tool, verbose=False):
             result = client.get_repo_info(**tool.function.arguments)
         case "agent_comment_issue":
             result = client.agent_comment_issue(**tool.function.arguments)
+        case "get_repo_file_content":
+            result = client.get_repo_file_content(**tool.function.arguments)
 
     if result == "":
         return f'Error: Unknow function name {tool.function.name}'
