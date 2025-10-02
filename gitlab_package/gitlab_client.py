@@ -13,24 +13,30 @@ class GitlabClient:
         logging.info(f"connected to GitLab project {GITLAB_PROJECT_ID}")
 
     def get_ai_agent_issues(self):
-        issues = self.project.issues.list(state='opened', labels='ai:agent')
-        return issues[0] #TODO Only the first issue for the moment
+        try:
+            issues = self.project.issues.list(state='opened', labels='ai:agent')
+            return issues[0] #TODO Only the first issue for the moment
+        except Exception as e:
+            return f'Error: {e} occurred'
 
-    def create_merge_request(self, found_issue):
+    def create_merge_request(self, found_issue_id):
         data = {
             'source_branch': 'ai_branch',
             'target_branch': 'main',
             'title': "issue_fix",
             'labels': ['ai:agent'],
-            'description': f'closes #{found_issue}',
+            'description': f'closes #{found_issue_id}',
         }
-        self.project.mergerequests.create(data)
-        return f'created merge request for {found_issue[1]}'
+        try:
+            self.project.mergerequests.create(data)
+            return f'created merge request for {found_issue_id}'
+        except Exception as e:
+            return f'Error: {e} occurred'
 
     def create_commit(self, action: str,commit_message: str, file_path: str, content: str):
         data = {
             'branch': 'ai_branch',
-            'commit_message': commit_message, #TODO AI message
+            'commit_message': commit_message,
             'actions': [
                 {
                     'action': action,
@@ -39,7 +45,11 @@ class GitlabClient:
                 }
             ]
         }
-        self.project.commits.create(data)
+        try:
+            self.project.commits.create(data)
+            return f'{commit_message}'
+        except Exception as e:
+            return f'Error: {e} occurred'
 
     def update_ai_branch(self):
         try:
@@ -54,8 +64,9 @@ class GitlabClient:
                 self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
         except GitlabGetError:
             self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
+        return 'ai_branch is now up to date!'
 
-    def agent_fix_issue(self, commit_messages: list[str], action: str,  file_path: str, content: str, issue):
+    def agent_fix_issue(self, issue_id, commit_messages: list[str], action: str,  file_path: str, content: str, ):
         """
             Automatically fixes a GitLab issue.
 
@@ -63,11 +74,11 @@ class GitlabClient:
             and finally opens a merge request.
 
             Args:
+                issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
                 commit_messages (list[str]): A list of commit messages describing each modification.
                 action (str): The commit action to perform. Can be one of: 'create', 'delete', 'move', or 'update'.
                 file_path (str): The path of the file to be committed.
                 content (str): The new content to include in the file for the commit.
-                issue: The GitLab issue object that is being fixed.
 
             Returns:
                 str: A message indicating whether the merge request was successfully created.
@@ -75,22 +86,15 @@ class GitlabClient:
         self.update_ai_branch()
         for commit_message in commit_messages:
             self.create_commit(action, commit_message, file_path, content)
-        return self.create_merge_request(issue[0])
+        return self.create_merge_request(issue_id)
 
 def look_for_issues(client):
     #TODO take the time in consideration
     # Only the first issue
     # time.sleep(2)
-    issue = client.get_ai_agent_issues()
-    issue_details = f"title: {issue.title}, description: {issue.description}".strip()
-    return issue.iid, issue_details
-
-if __name__ == "__main__":
-    client = GitlabClient()
-    # print(look_for_issues(client))
-    # client.create_commit()
-    # print(client.project.commits.list(ref_name='ai_branch',get_all=True))
-    client.create_merge_request()
-#     while True:
-#         look_for_issues(client)
-
+    try:
+        issue = client.get_ai_agent_issues()
+        issue_details = f"title: {issue.title}, description: {issue.description}, issue_id: {issue.iid}".strip()
+        return issue_details
+    except Exception as e:
+        return f'Error: {e} occurred'

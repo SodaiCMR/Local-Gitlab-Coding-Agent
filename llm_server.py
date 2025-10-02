@@ -20,8 +20,8 @@ def generate():
         "role": "system",
         "content": """
     You are a helpful AI coding agent.
-    You help to answer to gitlab issues; they are phrased based on two key points: the issue's title and it's description,
-    therefore you need to answer the question based on that. 
+    You help to fix the gitlab issues;
+    they are phrased based on three key points: the issue's title, it's description and it's id.
     when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
 
     When fixing a GitLab issue, follow this workflow:
@@ -53,7 +53,7 @@ def generate():
     # #     continue
     # if user_input == "/exit":
     #     return
-    msg = {"role":"user", "content":issue[1]}
+    msg = {"role":"user", "content":issue}
     messages.append(msg)
     for _ in range(max_iters + 1):
         if _ == max_iters:
@@ -74,12 +74,9 @@ def generate():
                 content = getattr(response.message, "content", None)
                 if content and str(content).strip():
                     messages.append({"role": "assistant", "content": content})
-                if tool.function.name == "agent_fix_issue":
-                    client.agent_fix_issue(**tool.function.arguments)
-                function_output = call_function(tool, verbose_flag)
+                function_output = call_function(client, tool, verbose_flag)
                 tool_msg = {"role": "tool", "content": function_output}
                 messages.append(tool_msg)
-                print(response.message.content)
             # if verbose_flag:
             #     print(f"User prompt: {msg['content']}")
             #     print(f"Prompt tokens: {response.prompt_eval_count}")
