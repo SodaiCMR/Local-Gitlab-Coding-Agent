@@ -46,13 +46,6 @@ def generate():
     if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
         verbose_flag = True
     issue = look_for_issues(client)
-    # print("ask a question: ")
-    # while True:
-    # user_input = input("> ").strip()
-    # if not user_input:
-    # #     continue
-    # if user_input == "/exit":
-    #     return
     msg = {"role":"user", "content":issue}
     messages.append(msg)
     for _ in range(max_iters + 1):

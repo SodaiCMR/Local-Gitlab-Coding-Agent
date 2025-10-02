@@ -1,8 +1,8 @@
 import gitlab
 import logging
 import time
-from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
-# from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
+# from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
+from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
 
 class GitlabClient:
@@ -88,6 +88,7 @@ class GitlabClient:
             self.create_commit(action, commit_message, file_path, content)
         return self.create_merge_request(issue_id)
 
+
 def look_for_issues(client):
     #TODO take the time in consideration
     # Only the first issue
@@ -98,3 +99,8 @@ def look_for_issues(client):
         return issue_details
     except Exception as e:
         return f'Error: {e} occurred'
+
+if __name__ == "__main__":
+    client = GitlabClient()
+    items = client.project.repository_tree()
+    print(items)
