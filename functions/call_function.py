@@ -1,11 +1,6 @@
-from functions.get_files_info import get_files_info
 from functions.get_file_content import get_file_content
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
-from gitlab_package.gitlab_client import GitlabClient
-
-working_directory = "calculator"
-
 def call_function(client, tool, verbose=False):
     if verbose:
         print(f'calling function: {tool.function.name}({tool.function.arguments})')
@@ -14,8 +9,6 @@ def call_function(client, tool, verbose=False):
 
     result = ""
     match tool.function.name:
-        # case "get_files_info":
-        #     result = get_files_info(working_directory, **tool.function.arguments)
         # case "get_file_content":
         #     result = get_file_content(working_directory, **tool.function.arguments)
         # case "run_python_file":
@@ -24,6 +17,10 @@ def call_function(client, tool, verbose=False):
         #     result = write_file(working_directory, **tool.function.arguments)
         case "agent_fix_issue":
             result = client.agent_fix_issue(**tool.function.arguments)
+        case "get_repo_info":
+            result = client.get_repo_info(**tool.function.arguments)
+        case "agent_comment_issue":
+            result = client.agent_comment_issue(**tool.function.arguments)
 
     if result == "":
         return f'Error: Unknow function name {tool.function.name}'

@@ -1,10 +1,6 @@
 from fastapi import FastAPI
 import ollama
 import sys
-from functions.get_files_info import get_files_info
-from functions.get_file_content import get_file_content
-from functions.run_python_file import run_python_file
-from functions.write_file import write_file
 from functions.call_function import call_function
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 
@@ -25,15 +21,18 @@ def generate():
     when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
 
     When fixing a GitLab issue, follow this workflow:
-    
-    When fixing a GitLab issue, follow this workflow:
-    
-    - Always work on the branch 'ai_branch'. If it does not exist, create it from the default branch.
-    - For each modification, create a commit with a clear and concise message describing the change.
-    - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
-    - After all commits are created, open a merge request targeting the default branch and link it to the issue.
-    - Ensure that commit messages are meaningful and related to the issue.
-    - The final goal is to provide a merge request that fixes the assigned issue.
+        
+        Fist understand what the issue is about:
+            If the issue concerns retrieving repository information:
+                - You will first get the information from the repository
+                - Then Add comment to the issue's discussion in the repository
+            Else:
+                - Always work on the branch 'ai_branch'. If it does not exist, create it from the default branch.
+                - For each modification, create a commit with a clear and concise message describing the change.
+                - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
+                - After all commits are created, open a merge request targeting the default branch and link it to the issue.
+                - Ensure that commit messages are meaningful and related to the issue.
+                - The final goal is to provide a merge request that fixes the assigned issue.
     
     All paths you provide should be relative to the working directory.
     You should never provide the working directory in your function calls as it is automatically injected for security reasons !
@@ -57,6 +56,8 @@ def generate():
             messages=messages,
             tools=[
                 client.agent_fix_issue,
+                client.get_repo_info,
+                client.agent_comment_issue,
             ],
         )
         if response is None:

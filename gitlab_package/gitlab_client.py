@@ -1,8 +1,8 @@
 import gitlab
 import logging
 import time
-# from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
-from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
+from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
+# from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
 
 class GitlabClient:
@@ -88,6 +88,54 @@ class GitlabClient:
             self.create_commit(action, commit_message, file_path, content)
         return self.create_merge_request(issue_id)
 
+    def agent_comment_issue(self, issue_id: int, content: str):
+        """
+            Add comment to an issue discussion.
+            The agent add a comment to an issue when the issue details specify the need to get infos from the repository
+
+        Args:
+            issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
+            content (str): The content that need to be added to the issue discussion.
+
+        Returns
+            str: A message indicating whether the agent added a comment to the issue's discussion.
+        """
+        try:
+            issue = self.project.issues.get(issue_id)
+            issue.notes.create({"body": content})
+            return f'Added comment to issue#{issue_id} discussion'
+        except Exception as e:
+            return f'Error: {e} occurred'
+
+    def get_repo_info(self, path:str='.'):#TODO Check folder that need to be exlcuded
+        """
+           Lists all the items in the specified directory, inside the repository.
+
+           Args:
+               path (str): The directory to list files. If not provided use '.'
+               lists files in the repository itself.
+           Returns:
+               str: The list of the files and directories in the specified directory inside the repository.
+        """
+        repo_infos = ''
+        items = self.project.repository_tree(path=path)
+        for item in items:
+            if item['type'] == 'tree':
+                repo_infos += f"- {item['path']}: is_dir= True\n"
+                repo_infos += self.get_repo_info(path=item['path'])
+            elif item['type'] == 'blob':
+                repo_infos += f"- {item['path']}: is_dir= False\n"
+        return repo_infos
+
+    def get_repo_files_content(self):
+        pass
+
+    def write_repo_file(self):
+        pass
+
+    def run_repo_file(self):
+        pass
+
 
 def look_for_issues(client):
     #TODO take the time in consideration
@@ -102,5 +150,4 @@ def look_for_issues(client):
 
 if __name__ == "__main__":
     client = GitlabClient()
-    items = client.project.repository_tree()
-    print(items)
+    # client.agent_comment_issue(5, 'Of course ! WHO THE HELL do you think I am .... ')
