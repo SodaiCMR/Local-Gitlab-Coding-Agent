@@ -24,12 +24,16 @@ def generate():
     therefore you need to answer the question based on that. 
     when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project
 
-    When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
-
-    - List files and directories
-    - Read file contents
-    - Execute Python files with optional arguments
-    - Write or overwrite files
+    When fixing a GitLab issue, follow this workflow:
+    
+    When fixing a GitLab issue, follow this workflow:
+    
+    - Always work on the branch 'ai_branch'. If it does not exist, create it from the default branch.
+    - For each modification, create a commit with a clear and concise message describing the change.
+    - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
+    - After all commits are created, open a merge request targeting the default branch and link it to the issue.
+    - Ensure that commit messages are meaningful and related to the issue.
+    - The final goal is to provide a merge request that fixes the assigned issue.
     
     All paths you provide should be relative to the working directory.
     You should never provide the working directory in your function calls as it is automatically injected for security reasons !
@@ -59,10 +63,6 @@ def generate():
             model="qwen2.5",
             messages=messages,
             tools=[
-                get_files_info,
-                get_file_content,
-                run_python_file,
-                write_file,
                 client.agent_fix_issue,
             ],
         )
@@ -75,7 +75,7 @@ def generate():
                 if content and str(content).strip():
                     messages.append({"role": "assistant", "content": content})
                 if tool.function.name == "agent_fix_issue":
-                    client.agent_fix_issue(messages, **tool.function.arguments)
+                    client.agent_fix_issue(**tool.function.arguments)
                 function_output = call_function(tool, verbose_flag)
                 tool_msg = {"role": "tool", "content": function_output}
                 messages.append(tool_msg)

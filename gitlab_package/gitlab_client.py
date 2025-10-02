@@ -49,28 +49,32 @@ class GitlabClient:
 
         try:
             ai_branch = self.project.branches.get("ai_branch")
-            ai_branch.commit = main_branch.commit['id']
-            ai_branch.save(force=True)
+            if ai_branch.commit['id'] !=  main_branch.commit['id']:
+                self.project.branches.delete('ai_branch')
+                self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
         except GitlabGetError:
             self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
 
-    def agent_fix_issue(self, model_output: str, action: str,  file_path: str, content: str, issue):
+    def agent_fix_issue(self, commit_messages: list[str], action: str,  file_path: str, content: str, issue):
         """
-           The agent independently fixes a gitlab issue
-           It first update the ai_branch on gitlab, then create commits for every modification it did
-           and finally create a merge request
-           Args:
-               action (str): The commit action that needs to be taken.
-               It can either be 'create', 'delete', 'move' or 'update'
-               model_output (str): The agent output which describes which actions it took.
-               file_path (str): The file path to the file that needs to be committed.
-               content (str): The new content added to the file in the commit.
-           Returns:
-               str: Tells whether the merge request was successfully created.
-           """
+            Automatically fixes a GitLab issue.
+
+            The agent updates the 'ai_branch' on GitLab, creates commits for each modification,
+            and finally opens a merge request.
+
+            Args:
+                commit_messages (list[str]): A list of commit messages describing each modification.
+                action (str): The commit action to perform. Can be one of: 'create', 'delete', 'move', or 'update'.
+                file_path (str): The path of the file to be committed.
+                content (str): The new content to include in the file for the commit.
+                issue: The GitLab issue object that is being fixed.
+
+            Returns:
+                str: A message indicating whether the merge request was successfully created.
+    """
         self.update_ai_branch()
-        for message in model_output:
-            self.create_commit(action, message, file_path, content)
+        for commit_message in commit_messages:
+            self.create_commit(action, commit_message, file_path, content)
         return self.create_merge_request(issue[0])
 
 def look_for_issues(client):
