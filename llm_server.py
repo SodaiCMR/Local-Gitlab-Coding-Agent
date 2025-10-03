@@ -5,12 +5,14 @@ from functions.call_function import call_function
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 
 max_iters = 20 #TODO check the max number of iterations
+verbose_flag = False
+if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
+    verbose_flag = True
+
 app = FastAPI()
 client = GitlabClient()
-
 @app.post("/generate")
 def generate():
-    verbose_flag = False
     messages = []
     system_prompt = {
         "role": "system",
@@ -45,8 +47,6 @@ def generate():
     }
     messages.append(system_prompt)
 
-    if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
-        verbose_flag = True
     issue = look_for_issues(client)
     issue_id = int(str(issue).split(" ")[-1])
     msg = {"role":"user", "content":issue}

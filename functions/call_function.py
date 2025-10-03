@@ -1,4 +1,3 @@
-from functions.run_python_file import run_python_file
 def call_function(client, tool, verbose=False):
     if verbose:
         print(f'calling function: {tool.function.name}({tool.function.arguments})')
@@ -8,8 +7,6 @@ def call_function(client, tool, verbose=False):
     result = ""
     try:
         match tool.function.name:
-            # case "run_python_file":
-            #     result = run_python_file(working_directory, **tool.function.arguments)
             case "agent_fix_issue":
                 result = client.agent_fix_issue(**tool.function.arguments)
             case "get_repo_info":
