@@ -68,13 +68,13 @@ def generate():
         if response is None:
             print('Response is malformed')
             break
+        content = getattr(response.message, "content", None)
+        if content and str(content).strip():
+            messages.append({"role": "assistant", "content": content})
         if response.message.tool_calls:
             for tool in response.message.tool_calls:
-                content = getattr(response.message, "content", None)
-                if content and str(content).strip():
-                    messages.append({"role": "assistant", "content": content})
                 function_output = call_function(client, tool, verbose_flag)
-                tool_msg = {"role": "tool", "content": function_output}
+                tool_msg = {"role": "tool", "content": f"function_name:{tool.function.name} function_output:{function_output}"}
                 messages.append(tool_msg)
             # if verbose_flag:
             #     print(f"User prompt: {msg['content']}")

@@ -21,16 +21,22 @@ class GitlabClient:
             return f'Error: {e} occurred'
 
     def create_merge_request(self, found_issue_id):
+        issue = self.project.issues.get(found_issue_id)
+        related_mrs = issue.related_merge_requests()
+        for mr in related_mrs:
+            if mr['state'] == "opened":
+                return f'Can not create another merge request for issue#{found_issue_id} since one is already opened'
+
         data = {
             'source_branch': 'ai_branch',
-            'target_branch': 'main',
-            'title': "issue_fix",
+            'target_branch': 'main', #TODO master or name need to get the branch's name
+            'title': f"issue#{found_issue_id} fix",
             'labels': ['ai:agent'],
             'description': f'closes #{found_issue_id}',
         }
         try:
             self.project.mergerequests.create(data)
-            return f'Successfully created the merge request for issue#{found_issue_id}'
+            return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
         except Exception as e:
             return f'Error: {e} occurred'
 
@@ -67,19 +73,21 @@ class GitlabClient:
             self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
         return 'ai_branch is now up to date!'
 
-    def agent_fix_issue(self, issue_id, commit_messages: list[str], action: str,  file_path: str, content: str):
+    def agent_fix_issue(self, issue_id, commit_messages: list[str], action: str, file_path: str, content: str):
         """
             Automatically fixes a GitLab issue.
 
-            The agent updates the 'ai_branch' on GitLab, creates commits for each modification,
-            and finally opens a merge request.
+            First updates the 'ai_branch' on GitLab then creates commits for each modification,
+            and finally opens the merge request related to the issue.
+            Should only create one merge request for the issue and stops when successfully created.
 
             Args:
                 issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
                 commit_messages (list[str]): A list of commit messages describing each modification.
-                action (str): The commit action to perform. Can be one of: 'create', 'delete', 'move', or 'update'.
+                action (str): The commit action to perform. Can be one of: 'create', 'delete', 'update'.
                 file_path (str): The path of the file to be committed.
                 content (str): The new content to include in the file for the commit.
+                This is only required when the commit action is either 'create' or 'update' else just use ''.
 
             Returns:
                 str: A message indicating whether the merge request was successfully created.
@@ -169,4 +177,8 @@ def look_for_issues(client):
 
 # if __name__ == "__main__":
 #     client = GitlabClient()
-#     client.create_commit('delete', 'delete hello.py', 'calculator/hello.py', '')
+#     issue = client.project.issues.get(10)
+#     related_mrs = issue.related_merge_requests()
+#     for mr in related_mrs:
+#         print(f"{mr['title']}: state:{mr['state']}")
+    # print(mr_list)
