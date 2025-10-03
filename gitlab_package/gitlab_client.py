@@ -2,7 +2,6 @@ import gitlab
 import logging
 import time
 from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
-# from config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
 import base64
 
@@ -16,8 +15,10 @@ class GitlabClient:
     def get_ai_agent_issues(self):
         try:
             issues = self.project.issues.list(state='opened', labels='ai:agent')
+            if not issues:
+                return ''
             return issues[0] #TODO Only the first issue for the moment
-        except Exception as e:
+        except GitlabGetError as e:
             return f'Error: {e} occurred'
 
     def create_merge_request(self, found_issue_id):
@@ -45,7 +46,7 @@ class GitlabClient:
         try:
             self.project.mergerequests.create(data)
             return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
-        except Exception as e:
+        except GitlabGetError as e:
             return f'Error: {e} occurred'
 
     def create_commit(self, action: str, commit_message: str, file_path: str, content: str):
@@ -53,7 +54,7 @@ class GitlabClient:
              Automatically create commits for a GitLab issue
 
              Args:
-                 commit_messages (str): The commit message describing each modification.
+                 commit_message (str): The commit message describing each modification.
                  action (str): The commit action to perform. Can be one of: 'create', 'delete', 'update'.
                  file_path (str): The path of the file to be committed.
                  content (str): The new content to include in the file for the commit.
@@ -76,7 +77,7 @@ class GitlabClient:
         try:
             self.project.commits.create(data)
             return f'successfully committed {commit_message}'
-        except Exception as e:
+        except GitlabGetError as e:
             return f'Error: {e} occurred'
 
     def update_ai_branch(self):
@@ -121,10 +122,10 @@ class GitlabClient:
             issue = self.project.issues.get(issue_id)
             issue.notes.create({"body": content})
             return f'Added comment to issue#{issue_id} discussion'
-        except Exception as e:
+        except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def get_repo_info(self, path:str='.'):#TODO Check folder that need to be excluded
+    def get_repo_info(self, path:str='.'):
         """
            Lists all the items in the specified directory, inside the repository.
 
@@ -143,7 +144,7 @@ class GitlabClient:
                     repo_infos += self.get_repo_info(path=item['path'])
                 elif item['type'] == 'blob':
                     repo_infos += f"- {item['path']}: is_dir= False\n"
-        except Exception as e:
+        except GitlabGetError as e:
             return f'Error: {e} occurred'
 
         return repo_infos
@@ -158,7 +159,7 @@ class GitlabClient:
         """
         try:
             repo_file = self.project.files.get(file_path=file_path, ref='main')
-        except:
+        except GitlabGetError:
             repo_file = self.project.files.get(file_path=file_path, ref='master')
         content = base64.b64decode(repo_file.content)
         return content.decode('utf-8')
@@ -170,14 +171,12 @@ class GitlabClient:
 def look_for_issues(client):
     #TODO take the time in consideration
     # Only the first issue
-    # time.sleep(2)
+    time.sleep(2) #every 2 seconds
     try:
         issue = client.get_ai_agent_issues()
+        if not issue:
+            return issue
         issue_details = f"title: {issue.title}, description: {issue.description}, issue_id: {issue.iid}".strip()
         return issue_details
     except Exception as e:
         return f'Error: {e} occurred'
-
-if __name__ == "__main__":
-    client = GitlabClient()
-    print(client.update_ai_branch())

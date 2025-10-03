@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 import ollama
 import sys
 from functions.call_function import call_function
@@ -9,10 +8,7 @@ verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
-app = FastAPI()
-client = GitlabClient()
-@app.post("/generate")
-def generate():
+def start_llm_server(issue: str):
     messages = []
     system_prompt = {
         "role": "system",
@@ -34,7 +30,7 @@ def generate():
                 - After retrieving the required information, always the call to add comment to the issue's discussion
             
             Else:
-                - Always Fist start by updating the branch 'ai_branch' by calling the correct function.
+                - Always first ensure that the branch 'ai_branch' is up-to-date or create it by calling the correct function.
                 - For each modification, create a commit with a clear and concise message describing the change.
                 - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
                 - After all commits are created, open a merge request targeting the default branch and link it to the issue.
@@ -47,7 +43,6 @@ def generate():
     }
     messages.append(system_prompt)
 
-    issue = look_for_issues(client)
     issue_id = int(str(issue).split(" ")[-1])
     msg = {"role":"user", "content":issue}
     messages.append(msg)
@@ -93,4 +88,10 @@ def generate():
     return
 
 if __name__ == "__main__":
-    generate()
+    client = GitlabClient()
+    while not look_for_issues(client):
+        print('no issue found yet')
+        continue
+    issue = look_for_issues(client)
+    client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue...')
+    start_llm_server(issue)
