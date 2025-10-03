@@ -48,9 +48,9 @@ def generate():
     if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
         verbose_flag = True
     issue = look_for_issues(client)
+    issue_id = int(str(issue).split(" ")[-1])
     msg = {"role":"user", "content":issue}
     messages.append(msg)
-
     for _ in range(max_iters + 1):
         if _ == max_iters:
             print(f'Reached the maximum number of iterations {max_iters}')
@@ -71,6 +71,7 @@ def generate():
         content = getattr(response.message, "content", None)
         if content and str(content).strip():
             messages.append({"role": "assistant", "content": content})
+            client.agent_comment_issue(issue_id, content)
         if response.message.tool_calls:
             for tool in response.message.tool_calls:
                 function_output = call_function(client, tool, verbose_flag)

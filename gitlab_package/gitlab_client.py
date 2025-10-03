@@ -157,9 +157,6 @@ class GitlabClient:
         content = base64.b64decode(repo_file.content)
         return content.decode('utf-8')
 
-    def write_repo_file(self, file_path:str):
-        pass
-
     def run_repo_file(self):
         pass
 
