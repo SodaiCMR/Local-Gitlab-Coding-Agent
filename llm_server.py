@@ -34,7 +34,7 @@ def generate():
                 - After retrieving the required information, always the call to add comment to the issue's discussion
             
             Else:
-                - Always work on the branch 'ai_branch'. If it does not exist, create it from the default branch.
+                - Always Fist start by updating the branch 'ai_branch' by calling the correct function.
                 - For each modification, create a commit with a clear and concise message describing the change.
                 - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
                 - After all commits are created, open a merge request targeting the default branch and link it to the issue.
@@ -59,7 +59,9 @@ def generate():
             model="qwen2.5",
             messages=messages,
             tools=[
-                client.agent_fix_issue,
+                client.update_ai_branch,
+                client.create_commit,
+                client.create_merge_request,
                 client.get_repo_info,
                 client.agent_comment_issue,
                 client.get_repo_file_content,
@@ -75,7 +77,11 @@ def generate():
         if response.message.tool_calls:
             for tool in response.message.tool_calls:
                 function_output = call_function(client, tool, verbose_flag)
-                tool_msg = {"role": "tool", "content": f"function_name:{tool.function.name} function_output:{function_output}"}
+                tool_msg = {
+                    "role": "tool",
+                    "content": f"function_name:{tool.function.name} function_output:{function_output}"
+                }
+                client.agent_comment_issue(issue_id, function_output)
                 messages.append(tool_msg)
             # if verbose_flag:
             #     print(f"User prompt: {msg['content']}")
