@@ -155,7 +155,7 @@ class GitlabClient:
             Args:
                 file_path (str): The file path to the file in the repository.
             Returns:
-                str: what is inside the given file path
+                str: The content of the given file path
         """
         try:
             repo_file = self.project.files.get(file_path=file_path, ref='main')
