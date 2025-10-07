@@ -1,23 +1,21 @@
-import gitlab
-import logging
-import time
 from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
+import gitlab
 import base64
+import time
 
 class GitlabClient:
     def __init__(self):
         self.gl = gitlab.Gitlab(GITLAB_URL, private_token=GITLAB_PRIVATE_TOKEN)
         self.gl.auth()
         self.project = self.gl.projects.get(int(GITLAB_PROJECT_ID))
-        logging.info(f"connected to GitLab project {GITLAB_PROJECT_ID}")
 
     def get_ai_agent_issues(self):
         try:
             issues = self.project.issues.list(state='opened', labels='ai:agent')
             if not issues:
                 return ''
-            return issues[0] #TODO Only the first issue for the moment
+            return issues[-1] #TODO Only the oldest issue
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
@@ -91,9 +89,8 @@ class GitlabClient:
         """
         try:
             main_branch = self.project.branches.get("main")
-        except GitlabGetError:
-            main_branch = self.project.branches.get("master") #In case the main branch is master instead of main
-
+        except GitlabGetError as e:
+            return f'Error {e} occurred'
         try:
             ai_branch = self.project.branches.get("ai_branch")
             if ai_branch.commit['id'] !=  main_branch.commit['id']:
@@ -159,18 +156,14 @@ class GitlabClient:
         """
         try:
             repo_file = self.project.files.get(file_path=file_path, ref='main')
-        except GitlabGetError:
-            repo_file = self.project.files.get(file_path=file_path, ref='master')
-        content = base64.b64decode(repo_file.content)
-        return content.decode('utf-8')
-
-    def run_repo_file(self):
-        pass
+            content = base64.b64decode(repo_file.content)
+            return content.decode('utf-8')
+        except GitlabGetError as e:
+            return f'Error: {e} occurred'
 
 
 def look_for_issues(client):
     #TODO take the time in consideration
-    # Only the first issue
     time.sleep(2) #every 2 seconds
     try:
         issue = client.get_ai_agent_issues()
