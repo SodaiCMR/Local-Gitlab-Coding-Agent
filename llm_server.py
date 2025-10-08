@@ -14,19 +14,18 @@ def start_llm_server(issue: str):
         "role": "system",
         "content": """
     You are a helpful AI coding agent.
-    You help to fix the gitlab issues;
+    You help to fix the gitlab issues by proceeding step by step;
     they are phrased based on three key points: the issue's title, its description and its id.
-    when a user ask questions about a directory or project, you should first try to know which files and folders are inside the project.
 
     When fixing a GitLab issue, follow this workflow:
         
         First understand what the issue is about:
             If the issue concerns retrieving repository information:
                 - If the issue is about a folder (directory structure):
-                    - Use the corresponding function to list the contents of the folder
+                    - Use the corresponding function to list the content of the folder
                 - If the issue is about a file (its content):
                     - Use the corresponding function to fetch and decode the file content
-            Then Post the result back to the issue
+            Finally post the result back to the issue:
                 - After retrieving the required information, always the call to add comment to the issue's discussion
             
             Else:
@@ -51,7 +50,7 @@ def start_llm_server(issue: str):
             print(f'Reached the maximum number of iterations {max_iters}')
             break
         response = ollama.chat(
-            model="qwen2.5",
+            model="qwen2.5:14b",
             messages=messages,
             tools=[
                 client.update_ai_branch,
