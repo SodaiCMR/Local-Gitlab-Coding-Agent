@@ -19,12 +19,13 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_merge_request(self, found_issue_id):
+    def create_merge_request(self, found_issue_id, target_branch="main"):
         """
              Automatically create a merge request when done creating commits for a GitLab issue.
 
              Args:
                 found_issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
+                target_branch (str): The branch on which the merge request should be done. If not specified use "main".
              Returns:
                  str: A message indicating whether the merge request was successfully created.
         """
@@ -36,7 +37,7 @@ class GitlabClient:
 
         data = {
             'source_branch': 'ai_branch',
-            'target_branch': 'main', #TODO master or name need to get the branch's name
+            'target_branch': target_branch,
             'title': f"issue#{found_issue_id} fix",
             'labels': ['ai:agent'],
             'description': f'closes #{found_issue_id}',
@@ -78,17 +79,19 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def update_ai_branch(self):
+    def update_ai_branch(self, target_branch="main"):
         """
             Create or update the ai_branch when addressing a GitLab issue before committing.
             If ai_branch already exists but is outdated, delete and recreate it based on the latest main.
             Otherwise, simply create it from the up-to-date main branch.
+            Args:
+                target_branch (str): The branch to which the ai_branch should be updated. If not specified use "main".
 
             Returns:
                 str: A message indicating whether the ai_branch was successfully created and based to the latest main.
         """
         try:
-            main_branch = self.project.branches.get("main")
+            main_branch = self.project.branches.get(target_branch)
         except GitlabGetError as e:
             return f'Error {e} occurred'
         try:
