@@ -86,7 +86,12 @@ def start_llm_server(issue: str):
     return
 
 if __name__ == "__main__":
-    client = GitlabClient()
+    while True:
+        try:
+            client = GitlabClient()
+            break
+        except Exception as e:
+            print(f'{e} occurred')
     while not look_for_issues(client):
         print('no issue found yet')
         continue
