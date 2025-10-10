@@ -68,7 +68,7 @@ class GitlabClient:
                 {
                     'action': action,
                     'file_path': file_path,
-                    'content': content,
+                    'content': content.replace('\r\n','\n')
                 }
             ]
         }

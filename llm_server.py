@@ -91,5 +91,5 @@ if __name__ == "__main__":
         print('no issue found yet')
         continue
     issue = look_for_issues(client)
-    client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue...')
+    client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue😃...')
     start_llm_server(issue)
