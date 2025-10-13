@@ -16,6 +16,14 @@ def start_llm_server(issue: str):
     You are a helpful AI coding agent.
     You help to fix the gitlab issues by proceeding step by step;
     they are phrased based on three key points: the issue's title, its description and its id.
+    
+    You can perform the following actions :
+    - Update or create the ai_branch.
+    - Write or update code or content of a given file and commit changes to ai_branch.
+    - Add comment to a gitlab issue.
+    - Get the file content of a given file in a repository.
+    - Get the repository information's (files and structure).
+    - Create a merge request.
 
     When fixing a GitLab issue, follow this workflow:
         
@@ -60,7 +68,7 @@ def start_llm_server(issue: str):
                 client.agent_comment_issue,
                 client.get_repo_file_content,
             ],
-            # options={"temperature": 0.12}
+            # options={"thinking": False}
         )
         if response is None:
             print('Response is malformed')

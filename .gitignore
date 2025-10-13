@@ -62,3 +62,5 @@ env.bak/
 venv.bak/
 .idea
 sandbox.py
+identifier.sqlite
+database.db

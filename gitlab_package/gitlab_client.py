@@ -29,6 +29,10 @@ class GitlabClient:
              Returns:
                  str: A message indicating whether the merge request was successfully created.
         """
+
+        if not self.project.commits.list(ref_name='ai_branch', get_all=True):
+            return f"Can't merge request with no commits"
+
         issue = self.project.issues.get(found_issue_id)
         related_mrs = issue.related_merge_requests()
         for mr in related_mrs:
@@ -56,7 +60,7 @@ class GitlabClient:
                  commit_message (str): The commit message describing each modification.
                  action (str): The commit action to perform. Can be one of: 'create', 'delete', 'update'.
                  file_path (str): The path of the file to be committed.
-                 content (str): The new content to include in the file for the commit.
+                 content (str): The new content to write inside the file related to the commit.
                  This is only required when the commit action is either 'create' or 'update' else just use ''
 
              Returns:
