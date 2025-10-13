@@ -50,7 +50,7 @@ def start_llm_server(issue: str):
             print(f'Reached the maximum number of iterations {max_iters}')
             break
         response = ollama.chat(
-            model="qwen2.5:14b",
+            model="qwen3:8b",
             messages=messages,
             tools=[
                 client.update_ai_branch,
@@ -60,6 +60,7 @@ def start_llm_server(issue: str):
                 client.agent_comment_issue,
                 client.get_repo_file_content,
             ],
+            # options={"temperature": 0.12}
         )
         if response is None:
             print('Response is malformed')
@@ -75,6 +76,7 @@ def start_llm_server(issue: str):
                     "role": "tool",
                     "content": f"function_name:{tool.function.name} function_output:{function_output}"
                 }
+                client.agent_comment_issue(issue_id, function_output)
                 messages.append(tool_msg)
             # if verbose_flag:
             #     print(f"User prompt: {msg['content']}")
