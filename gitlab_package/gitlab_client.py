@@ -30,8 +30,6 @@ class GitlabClient:
                  str: A message indicating whether the merge request was successfully created.
         """
 
-        if not self.project.commits.list(ref_name='ai_branch', get_all=True):
-            return f"Can't merge request with no commits"
 
         issue = self.project.issues.get(found_issue_id)
         related_mrs = issue.related_merge_requests()
@@ -47,7 +45,12 @@ class GitlabClient:
             'description': f'closes #{found_issue_id}',
         }
         try:
-            self.project.mergerequests.create(data)
+            main_branch = self.project.branches.get(target_branch)
+            ai_branch = self.project.branches.get("ai_branch")
+            if ai_branch.commit['id'] ==  main_branch.commit['id']:
+                return "Can't merge request with no commits"
+            else:
+                self.project.mergerequests.create(data)
             return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
         except GitlabGetError as e:
             return f'Error: {e} occurred'
