@@ -15,7 +15,7 @@ class GitlabClient:
             issues = self.project.issues.list(state='opened', labels='ai:agent')
             if not issues:
                 return ''
-            return issues[-1] #TODO Only the oldest issue
+            return issues[-1] #Start with  the oldest issue
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
@@ -173,8 +173,7 @@ class GitlabClient:
 
 
 def look_for_issues(client):
-    #TODO take the time in consideration
-    time.sleep(2) #every 2 seconds
+    time.sleep(2) # look for issue every 2 seconds
     try:
         issue = client.get_ai_agent_issues()
         if not issue:

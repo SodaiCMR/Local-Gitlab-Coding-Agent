@@ -3,7 +3,6 @@ import sys
 from functions.call_function import call_function
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 
-max_iters = 20 #TODO check the max number of iterations
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
@@ -53,10 +52,7 @@ def start_llm_server(issue: str):
     issue_id = int(str(issue).split(" ")[-1])
     msg = {"role":"user", "content":issue}
     messages.append(msg)
-    for _ in range(max_iters + 1):
-        if _ == max_iters:
-            print(f'Reached the maximum number of iterations {max_iters}')
-            break
+    while True:
         response = ollama.chat(
             model="qwen3:8b",
             messages=messages,
@@ -68,7 +64,6 @@ def start_llm_server(issue: str):
                 client.agent_comment_issue,
                 client.get_repo_file_content,
             ],
-            # options={"thinking": False}
         )
         if response is None:
             print('Response is malformed')
@@ -86,10 +81,6 @@ def start_llm_server(issue: str):
                 }
                 client.agent_comment_issue(issue_id, function_output)
                 messages.append(tool_msg)
-            # if verbose_flag:
-            #     print(f"User prompt: {msg['content']}")
-            #     print(f"Prompt tokens: {response.prompt_eval_count}")
-            #     print(f"Response tokens: {response.eval_count}")
         else:
             print(response.message.content)
             break
@@ -97,14 +88,15 @@ def start_llm_server(issue: str):
 
 if __name__ == "__main__":
     while True:
-        try:
-            client = GitlabClient()
-            break
-        except Exception as e:
-            print(f'{e} occurred')
-    while not look_for_issues(client):
-        print('no issue found yet')
-        continue
-    issue = look_for_issues(client)
-    client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue😃...')
-    start_llm_server(issue)
+        while True:
+            try:
+                client = GitlabClient()
+                break
+            except Exception as e:
+                print(f'{e} occurred')
+        while not look_for_issues(client):
+            print('no issue found yet')
+            continue
+        issue = look_for_issues(client)
+        client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue😃...')
+        start_llm_server(issue)
