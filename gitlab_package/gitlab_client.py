@@ -12,10 +12,17 @@ class GitlabClient:
 
     def get_ai_agent_issues(self):
         try:
-            issues = self.project.issues.list(state='opened', labels='ai:agent')
+            issues = self.project.issues.list(order_by='created_at', sort='asc', state='opened', labels='ai:agent')
             if not issues:
                 return ''
-            return issues[-1] #Start with  the oldest issue
+            else:
+                for issue in issues:
+                    related_mrs = issue.related_merge_requests()
+                    if related_mrs and any(mr['state'] == 'opened' for mr in related_mrs):
+                        continue
+                    else:
+                        return issue
+                return ''
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
