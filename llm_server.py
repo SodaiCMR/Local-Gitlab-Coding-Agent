@@ -81,6 +81,7 @@ def start_llm_server(issue: str):
                     "content": f"function_name:{tool.function.name} function_output:{function_output}"
                 }
                 messages.append(tool_msg)
+                client.agent_comment_issue(issue_id, function_output)
         else:
             print(response.message.content)
             break
