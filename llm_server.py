@@ -68,6 +68,7 @@ def start_llm_server(issue: str):
         if response is None:
             print('Response is malformed')
             break
+        client.agent_comment_issue(issue_id, response.message.thinking)
         content = getattr(response.message, "content", None)
         if content and str(content).strip():
             messages.append({"role": "assistant", "content": content})
@@ -79,7 +80,6 @@ def start_llm_server(issue: str):
                     "role": "tool",
                     "content": f"function_name:{tool.function.name} function_output:{function_output}"
                 }
-                client.agent_comment_issue(issue_id, function_output)
                 messages.append(tool_msg)
         else:
             print(response.message.content)
@@ -98,5 +98,5 @@ if __name__ == "__main__":
             print('no issue found yet')
             continue
         issue = look_for_issues(client)
-        client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue😃...')
+        client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
         start_llm_server(issue)
