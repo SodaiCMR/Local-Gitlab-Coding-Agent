@@ -1,8 +1,11 @@
+import time
+
 import ollama
 import sys
 from functions.call_function import call_function
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 
+try_count, MAX_TRIES = 0, 5
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
@@ -87,12 +90,14 @@ def start_llm_server(issue: str):
 
 if __name__ == "__main__":
     while True:
-        while True:
+        while try_count < MAX_TRIES:
             try:
                 client = GitlabClient()
                 break
             except Exception as e:
                 print(f'{e} occurred')
+                try_count += 1
+                time.sleep(2)
         while not (issue:= look_for_issues(client)):
             print('no issue found yet')
             continue

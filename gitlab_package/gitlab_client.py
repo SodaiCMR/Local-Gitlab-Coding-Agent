@@ -9,20 +9,21 @@ class GitlabClient:
         self.gl = gitlab.Gitlab(GITLAB_URL, private_token=GITLAB_PRIVATE_TOKEN)
         self.gl.auth()
         self.project = self.gl.projects.get(int(GITLAB_PROJECT_ID))
+        self.issues_list = {}
 
     def get_ai_agent_issues(self):
         try:
             issues = self.project.issues.list(order_by='created_at', sort='asc', state='opened', labels='ai:agent')
             if not issues:
-                return ''
+                return {}
             else:
                 for issue in issues:
                     related_mrs = issue.related_merge_requests()
                     if related_mrs and any(mr['state'] == 'opened' for mr in related_mrs):
                         continue
                     else:
-                        return issue
-                return ''
+                        self.issues_list[f"issue{issue.iid}"] = {"issue": issue, "state": "to fix"}
+            return self.issues_list
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
@@ -57,7 +58,8 @@ class GitlabClient:
                 return "Can't merge request with no commits"
             else:
                 self.project.mergerequests.create(data)
-            return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
+                # self.issues_list[]
+                return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
