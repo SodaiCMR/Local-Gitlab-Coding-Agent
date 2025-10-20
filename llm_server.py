@@ -61,20 +61,18 @@ def start_llm_server(issue: str):
                 client.create_commit,
                 client.create_merge_request,
                 client.get_repo_info,
-                client.agent_comment_issue,
                 client.get_repo_file_content,
             ],
         )
         if response is None:
             print('Response is malformed')
             break
-        client.agent_comment_issue(issue_id, response.message.thinking)
-        content = getattr(response.message, "content", None)
-        if content and str(content).strip():
+
+        if content:= response.message.thinking:
             messages.append({"role": "assistant", "content": content})
             client.agent_comment_issue(issue_id, content)
-        if response.message.tool_calls:
-            for tool in response.message.tool_calls:
+        if tools := response.message.tool_calls:
+            for tool in tools:
                 function_output = call_function(client, tool, verbose_flag)
                 tool_msg = {
                     "role": "tool",
@@ -83,7 +81,7 @@ def start_llm_server(issue: str):
                 messages.append(tool_msg)
                 client.agent_comment_issue(issue_id, function_output)
         else:
-            print(response.message.content)
+            client.agent_comment_issue(issue_id, response.message.content)
             break
     return
 
@@ -95,9 +93,8 @@ if __name__ == "__main__":
                 break
             except Exception as e:
                 print(f'{e} occurred')
-        while not look_for_issues(client):
+        while not (issue:= look_for_issues(client)):
             print('no issue found yet')
             continue
-        issue = look_for_issues(client)
         client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
         start_llm_server(issue)

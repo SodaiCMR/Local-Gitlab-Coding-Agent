@@ -26,7 +26,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_merge_request(self, found_issue_id, target_branch="main"):
+    def create_merge_request(self, found_issue_id: int, target_branch="main"):
         """
              Automatically create a merge request when done creating commits for a GitLab issue.
 
@@ -37,7 +37,6 @@ class GitlabClient:
                  str: A message indicating whether the merge request was successfully created.
         """
 
-
         issue = self.project.issues.get(found_issue_id)
         related_mrs = issue.related_merge_requests()
         for mr in related_mrs:
@@ -45,7 +44,7 @@ class GitlabClient:
                 return f'Can not create another merge request for issue#{found_issue_id} since one is already opened'
 
         data = {
-            'source_branch': 'ai_branch',
+            'source_branch': f"ai_branch_issue{found_issue_id}",
             'target_branch': target_branch,
             'title': f"issue#{found_issue_id} fix",
             'labels': ['ai:agent'],
@@ -53,7 +52,7 @@ class GitlabClient:
         }
         try:
             main_branch = self.project.branches.get(target_branch)
-            ai_branch = self.project.branches.get("ai_branch")
+            ai_branch = self.project.branches.get(f"ai_branch_issue{found_issue_id}")
             if ai_branch.commit['id'] ==  main_branch.commit['id']:
                 return "Can't merge request with no commits"
             else:
@@ -62,11 +61,12 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_commit(self, action: str, commit_message: str, file_path: str, content: str):
+    def create_commit(self, issue_id: int, action: str, commit_message: str, file_path: str, content: str):
         """
              Automatically create commits for a GitLab issue
 
              Args:
+                 issue_id (int): The id of the issue being fixed.
                  commit_message (str): The commit message describing each modification.
                  action (str): The commit action to perform. Can be one of: 'create', 'delete', 'update'.
                  file_path (str): The path of the file to be committed.
@@ -77,7 +77,7 @@ class GitlabClient:
                  str: A message indicating whether the merge request was successfully created.
         """
         data = {
-            'branch': 'ai_branch',
+            'branch': f"ai_branch_issue{issue_id}",
             'commit_message': commit_message,
             'actions': [
                 {
@@ -93,44 +93,44 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def update_ai_branch(self, target_branch="main"):
+    def update_ai_branch(self, issue_id, target_branch="main"):
         """
             Create or update the ai_branch when addressing a GitLab issue before committing.
             If ai_branch already exists but is outdated, delete and recreate it based on the latest main.
             Otherwise, simply create it from the up-to-date main branch.
             Args:
+                issue_id (int): The id of the issue being fixed.
                 target_branch (str): The branch to which the ai_branch should be updated. If not specified use "main".
 
             Returns:
                 str: A message indicating whether the ai_branch was successfully created and based to the latest main.
         """
+        ai_branch_name = f"ai_branch_issue{issue_id}"
         try:
             main_branch = self.project.branches.get(target_branch)
         except GitlabGetError as e:
             return f'Error {e} occurred'
         try:
-            ai_branch = self.project.branches.get("ai_branch")
+            ai_branch = self.project.branches.get(ai_branch_name)
             if ai_branch.commit['id'] !=  main_branch.commit['id']:
-                self.project.branches.delete('ai_branch')
+                self.project.branches.delete(ai_branch_name)
                 print('deleted ai_branch')
-                self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
+                self.project.branches.create({'branch': ai_branch_name,'ref': main_branch.commit['id']})
                 print('recreated ai_branch')
         except GitlabGetError:
-            self.project.branches.create({'branch': 'ai_branch','ref': main_branch.commit['id']})
+            self.project.branches.create({'branch': ai_branch_name,'ref': main_branch.commit['id']})
         return 'ai_branch is now up to date!'
 
     def agent_comment_issue(self, issue_id: int, content: str):
         """
             Add comment to an issue discussion.
-            The agent add a comment to an issue when the issue details specify the need to
-            whether getting infos or getting file content from the repository
 
         Args:
             issue_id (int): The GitLab issue's id that is being fixed its given in the issue_details.
             content (str): The content that need to be added to the issue discussion.
 
         Returns
-            str: A message indicating whether the agent added a comment to the issue's discussion.
+            str: The message that needs to be added to the issue's discussion.
         """
         try:
             issue = self.project.issues.get(issue_id)
