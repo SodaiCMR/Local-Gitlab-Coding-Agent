@@ -35,7 +35,7 @@ def start_llm_server(issue: str):
                     - Use the corresponding function to fetch and decode the file content
             
             Else:
-                - Always first ensure that the branch 'ai_branch' is up-to-date or create it by calling the correct function.
+                - Always first ensure that the branch relative to the issue is up-to-date or create it by calling the correct function.
                 - For each modification, create a commit with a clear and concise message describing the change.
                 - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
                 - After all commits are created, open a merge request targeting the default branch and link it to the issue.
@@ -43,7 +43,8 @@ def start_llm_server(issue: str):
                 - The final goal is to provide only one merge request that fixes the assigned issue.
     
     IMPORTANT: Only call tools when absolutely necessary to perform an action you cannot do from the model alone. 
-    If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool
+    If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool.
+    You should provide answers in French.
     """
     }
     messages.append(system_prompt)
