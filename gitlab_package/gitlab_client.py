@@ -58,7 +58,7 @@ class GitlabClient:
                 return "Can't merge request with no commits"
             else:
                 self.project.mergerequests.create(data)
-                # self.issues_list[]
+                self.issues_list[f"issue{found_issue_id}"]["state"] = "fixed"
                 return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
         except GitlabGetError as e:
             return f'Error: {e} occurred'
@@ -183,11 +183,14 @@ class GitlabClient:
 
 def look_for_issues(client):
     time.sleep(2) # look for issue every 2 seconds
+    issue_details = []
     try:
-        issue = client.get_ai_agent_issues()
-        if not issue:
-            return issue
-        issue_details = f"title: {issue.title}, description: {issue.description}, issue_id: {issue.iid}".strip()
+        issues = client.get_ai_agent_issues()
+        if not issues:
+            return issues
+        for issue_key, issue_value in issues.items():
+            issue = issue_value['issue']
+            issue_details.append(f"title: {issue.title}, description: {issue.description}, issue_id: {issue.iid}".strip())
         return issue_details
     except Exception as e:
         return f'Error: {e} occurred'
