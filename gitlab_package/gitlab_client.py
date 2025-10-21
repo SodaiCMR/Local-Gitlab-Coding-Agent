@@ -31,7 +31,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_merge_request(self, found_issue_id: int, target_branch="main"):
+    def create_merge_request(self, found_issue_id: int, target_branch='main'):
         """
              Automatically create a merge request when done creating commits for a GitLab issue.
 
@@ -66,7 +66,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_commit(self, issue_id: int, action: str, commit_message: str, file_path: str, content: str=""):
+    def create_commit(self, issue_id: int, action: str, commit_message: str, file_path: str, content: str=''):
         """
              Automatically create commits for a GitLab issue
 
@@ -97,7 +97,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def update_ai_branch(self, issue_id, target_branch="main"):
+    def update_ai_branch(self, issue_id: int, target_branch='main'):
         """
             Create or update the ai_branch when addressing a GitLab issue before committing.
             If ai_branch already exists but is outdated, delete and recreate it based on the latest main.
@@ -143,7 +143,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def get_repo_info(self, path:str='.'):
+    def get_repo_info(self, path: str='.'):
         """
            Lists all the items in the specified directory, inside the repository.
 
@@ -167,7 +167,7 @@ class GitlabClient:
 
         return repo_infos
 
-    def get_repo_file_content(self, file_path:str):
+    def get_repo_file_content(self, file_path: str):
         """
             Reads the content of the given file as a string.
             Args:
