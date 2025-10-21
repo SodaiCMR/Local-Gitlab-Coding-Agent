@@ -8,7 +8,7 @@ verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
-def start_llm_server(issue: str):
+def agent_fix_issue(issue: str):
     messages = []
     system_prompt = {
         "role": "system",
@@ -102,4 +102,4 @@ if __name__ == "__main__":
             continue
         for issue in issues:
             client.agent_comment_issue(int(str(issue).split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
-            start_llm_server(issue)
+            agent_fix_issue(issue)
