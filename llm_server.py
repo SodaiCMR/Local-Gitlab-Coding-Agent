@@ -88,6 +88,7 @@ def agent_fix_issue(issue: str):
     return
 
 if __name__ == "__main__":
+    client = None
     for _ in range(5):
         try:
             client = GitlabClient()
@@ -95,6 +96,9 @@ if __name__ == "__main__":
         except Exception as e:
             print(f'{e} occurred')
             time.sleep(2)
+
+    if client is None:
+        sys.exit()
 
     while True:
         while not (issues:= look_for_issues(client)):
