@@ -36,7 +36,7 @@ def start_llm_server(issue: str):
                 - After retrieving the required information, always the call to add comment to the issue's discussion
             
             Else:
-                - Always first ensure that the branch 'ai_branch' is up-to-date or create it by calling the correct function.
+                - Always first ensure that the branch relative to the issue is up-to-date or create it by calling the correct function.
                 - For each modification, create a commit with a clear and concise message describing the change.
                 - Allowed commit actions are: 'create', 'delete', 'move', or 'update'.
                 - After all commits are created, open a merge request targeting the default branch and link it to the issue.
@@ -44,7 +44,8 @@ def start_llm_server(issue: str):
                 - The final goal is to provide only one merge request that fixes the assigned issue.
     
     IMPORTANT: Only call tools when absolutely necessary to perform an action you cannot do from the model alone. 
-    If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool
+    If you can produce the user's final answer without calling any tools, respond directly and do not issue any tool.
+    You should provide answers in French.
     """
     }
     messages.append(system_prompt)
@@ -96,5 +97,5 @@ if __name__ == "__main__":
         while not (issue:= look_for_issues(client)):
             print('no issue found yet')
             continue
-        client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
+        client.agent_comment_issue(int(str(issue).split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
         start_llm_server(issue)
