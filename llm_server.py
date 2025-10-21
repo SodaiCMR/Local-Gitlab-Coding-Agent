@@ -1,9 +1,8 @@
-import time
-
-import ollama
-import sys
-from functions.call_function import call_function
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
+from functions.call_function import call_function
+import ollama
+import time
+import sys
 
 try_count, MAX_TRIES = 0, 5
 verbose_flag = False
@@ -22,7 +21,6 @@ def start_llm_server(issue: str):
     You can perform the following actions :
     - Update or create the ai_branch.
     - Write or update code or content of a given file and commit changes to ai_branch.
-    - Add comment to a gitlab issue.
     - Get the file content of a given file in a repository.
     - Get the repository information's (files and structure).
     - Create a merge request.
@@ -35,8 +33,6 @@ def start_llm_server(issue: str):
                     - Use the corresponding function to list the content of the folder
                 - If the issue is about a file (its content):
                     - Use the corresponding function to fetch and decode the file content
-            Finally post the result back to the issue:
-                - After retrieving the required information, always the call to add comment to the issue's discussion
             
             Else:
                 - Always first ensure that the branch 'ai_branch' is up-to-date or create it by calling the correct function.
@@ -84,22 +80,27 @@ def start_llm_server(issue: str):
                 messages.append(tool_msg)
                 client.agent_comment_issue(issue_id, function_output)
         else:
-            client.agent_comment_issue(issue_id, response.message.content)
+            content = getattr(response.message, "content", None)
+            if content and str(content).strip():
+                client.agent_comment_issue(issue_id, response.message.content)
+            client.issues_list[f"issue{issue_id}"]['state'] = "fixed"
             break
     return
 
 if __name__ == "__main__":
+    while try_count < MAX_TRIES:
+        try:
+            client = GitlabClient()
+            break
+        except Exception as e:
+            print(f'{e} occurred')
+            try_count += 1
+            time.sleep(2)
+
     while True:
-        while try_count < MAX_TRIES:
-            try:
-                client = GitlabClient()
-                break
-            except Exception as e:
-                print(f'{e} occurred')
-                try_count += 1
-                time.sleep(2)
-        while not (issue:= look_for_issues(client)):
+        while not (issues:= look_for_issues(client)):
             print('no issue found yet')
             continue
-        client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
-        start_llm_server(issue)
+        for issue in issues:
+            client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
+            start_llm_server(issue)

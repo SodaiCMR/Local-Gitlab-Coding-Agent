@@ -12,6 +12,7 @@ class GitlabClient:
         self.issues_list = {}
 
     def get_ai_agent_issues(self):
+        issues_to_fix = []
         try:
             issues = self.project.issues.list(order_by='created_at', sort='asc', state='opened', labels='ai:agent')
             if not issues:
@@ -21,9 +22,12 @@ class GitlabClient:
                     related_mrs = issue.related_merge_requests()
                     if related_mrs and any(mr['state'] == 'opened' for mr in related_mrs):
                         continue
+                    elif f"issue{issue.iid}" in self.issues_list.keys() and self.issues_list[f"issue{issue.iid}"]["state"] == "fixed":
+                        continue
                     else:
                         self.issues_list[f"issue{issue.iid}"] = {"issue": issue, "state": "to fix"}
-            return self.issues_list
+                        issues_to_fix.append(issue)
+            return issues_to_fix
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
@@ -58,7 +62,6 @@ class GitlabClient:
                 return "Can't merge request with no commits"
             else:
                 self.project.mergerequests.create(data)
-                self.issues_list[f"issue{found_issue_id}"]["state"] = "fixed"
                 return f'Done fixing the issue and successfully created the merge request for issue#{found_issue_id}'
         except GitlabGetError as e:
             return f'Error: {e} occurred'
@@ -188,9 +191,8 @@ def look_for_issues(client):
         issues = client.get_ai_agent_issues()
         if not issues:
             return issues
-        for issue_key, issue_value in issues.items():
-            issue = issue_value['issue']
+        for issue in issues:
             issue_details.append(f"title: {issue.title}, description: {issue.description}, issue_id: {issue.iid}".strip())
         return issue_details
-    except Exception as e:
+    except GitlabGetError as e:
         return f'Error: {e} occurred'
