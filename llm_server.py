@@ -4,7 +4,6 @@ import ollama
 import time
 import sys
 
-try_count, MAX_TRIES = 0, 5
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
@@ -89,13 +88,12 @@ def start_llm_server(issue: str):
     return
 
 if __name__ == "__main__":
-    while try_count < MAX_TRIES:
+    for _ in range(5):
         try:
             client = GitlabClient()
             break
         except Exception as e:
             print(f'{e} occurred')
-            try_count += 1
             time.sleep(2)
 
     while True:
@@ -103,5 +101,5 @@ if __name__ == "__main__":
             print('no issue found yet')
             continue
         for issue in issues:
-            client.agent_comment_issue(int(str(issue).split(" ")[-1]), 'Looking at the issue👀...')
+            client.agent_comment_issue(int(str(issue).split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
             start_llm_server(issue)
