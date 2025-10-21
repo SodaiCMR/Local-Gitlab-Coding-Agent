@@ -66,7 +66,7 @@ class GitlabClient:
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 
-    def create_commit(self, issue_id: int, action: str, commit_message: str, file_path: str, content: str):
+    def create_commit(self, issue_id: int, action: str, commit_message: str, file_path: str, content: str=""):
         """
              Automatically create commits for a GitLab issue
 
@@ -75,8 +75,7 @@ class GitlabClient:
                  commit_message (str): The commit message describing each modification.
                  action (str): The commit action to perform. Can be one of: 'create', 'delete', 'update'.
                  file_path (str): The path of the file to be committed.
-                 content (str): The new content to write inside the file related to the commit.
-                 This is only required when the commit action is either 'create' or 'update' else just use ''
+                 content (str): The new content to write inside the file related to the commit.Therefore, for actions like 'delete' just use ''.
 
              Returns:
                  str: A message indicating whether the merge request was successfully created.
