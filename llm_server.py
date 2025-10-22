@@ -6,11 +6,13 @@ import ollama
 import time
 import sys
 
+try_count, max_tries = 0, 20
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
 def agent_fix_issue(issue: str):
+    global try_count
     messages = []
     system_prompt = {
         "role": "system",
@@ -21,7 +23,7 @@ def agent_fix_issue(issue: str):
     issue_id = int(str(issue).split(" ")[-1])
     msg = {"role":"user", "content":issue}
     messages.append(msg)
-    while True:
+    while try_count <= max_tries:
         response = ollama.chat(
             model=LLM_MODEL,
             messages=messages,
@@ -33,9 +35,13 @@ def agent_fix_issue(issue: str):
                 client.get_repo_file_content,
             ],
         )
+        try_count += 1
         if response is None:
             print('Response is malformed')
             break
+
+        if try_count == max_tries - 1:
+            messages.append({"role": "assistant", "content": "reached max number of iterations. Stopping reasoning."})
 
         if content:= response.message.thinking:
             messages.append({"role": "assistant", "content": content})
