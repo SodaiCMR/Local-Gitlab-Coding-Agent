@@ -36,16 +36,13 @@ def agent_fix_issue(issue: str):
             ],
         )
         try_count += 1
-        if response is None:
-            print('Response is malformed')
-            break
-
         if try_count == max_tries - 1:
             messages.append({"role": "assistant", "content": "reached max number of iterations. Stopping reasoning."})
 
         if content:= response.message.thinking:
             messages.append({"role": "assistant", "content": content})
             client.agent_comment_issue(issue_id, content)
+
         if tools := response.message.tool_calls:
             for tool in tools:
                 function_output = call_function(client, tool, verbose_flag)
