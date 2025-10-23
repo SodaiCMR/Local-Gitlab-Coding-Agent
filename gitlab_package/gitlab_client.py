@@ -176,9 +176,8 @@ class GitlabClient:
                 str: The content of the given file path
         """
         try:
-            repo_file = self.project.files.get(file_path=file_path, ref='main')
-            content = base64.b64decode(repo_file.content)
-            return content.decode('utf-8')
+            repo_file = self.project.files.raw(file_path=file_path, ref='main')
+            return repo_file.decode('utf-8')
         except GitlabGetError as e:
             return f'Error: {e} occurred'
 

@@ -51,7 +51,6 @@ def agent_fix_issue(issue: str):
                     "content": f"function_name:{tool.function.name} function_output:{function_output}"
                 }
                 messages.append(tool_msg)
-                client.agent_comment_issue(issue_id, function_output)
         else:
             content = getattr(response.message, "content", None)
             if content and str(content).strip():
