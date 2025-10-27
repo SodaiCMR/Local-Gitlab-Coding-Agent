@@ -7,12 +7,14 @@ import time
 import sys
 
 try_count, max_tries = 0, 20
+thinking_mode = True
+
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
 def agent_fix_issue(issue: str):
-    global try_count
+    global try_count, thinking_mode
     messages = []
     system_prompt = {
         "role": "system",
@@ -34,23 +36,28 @@ def agent_fix_issue(issue: str):
                 client.get_repo_info,
                 client.get_repo_file_content,
             ],
+            # think=try_count == 0, # only use the thinking mode when establishing the plan
         )
         try_count += 1
         if try_count == max_tries - 1:
             messages.append({"role": "assistant", "content": "reached max number of iterations. Stopping reasoning."})
 
         if content:= response.message.thinking:
-            messages.append({"role": "assistant", "content": content})
+            client.agent_comment_issue(issue_id, "Réflexion profonde...")
             client.agent_comment_issue(issue_id, content)
+            messages.append({"role": "assistant", "content": content})
 
         if tools := response.message.tool_calls:
             for tool in tools:
+                function_name = tool.function.name
+                client.agent_comment_issue(issue_id, f"calling function {function_name}...")
                 function_output = call_function(client, tool, verbose_flag)
                 tool_msg = {
                     "role": "tool",
-                    "content": f"function_name:{tool.function.name} function_output:{function_output}"
+                    "content": f"function_name:{function_name} function_output:{function_output}"
                 }
                 messages.append(tool_msg)
+                client.agent_comment_issue(issue_id, f"fetching {function_name} function output...")
         else:
             content = getattr(response.message, "content", None)
             if content and str(content).strip():
@@ -65,7 +72,7 @@ if __name__ == "__main__":
         try:
             client = GitlabClient()
             break
-        except GitlabGetError as e:
+        except Exception as e:
             print(f'{e} occurred')
             time.sleep(2)
 
@@ -76,6 +83,7 @@ if __name__ == "__main__":
         while not (issues:= look_for_issues(client)):
             print('no issue found yet')
             continue
+        print(" === issue found === ")
         for issue in issues:
             client.agent_comment_issue(int(str(issue).split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
             agent_fix_issue(issue)

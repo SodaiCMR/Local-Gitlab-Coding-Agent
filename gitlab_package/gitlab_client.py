@@ -1,7 +1,6 @@
 from gitlab_package.config import GITLAB_PROJECT_ID, GITLAB_PRIVATE_TOKEN, GITLAB_URL
 from gitlab.exceptions import GitlabGetError
 import gitlab
-import base64
 import time
 
 class GitlabClient:
