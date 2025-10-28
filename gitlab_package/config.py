@@ -14,7 +14,7 @@ SYSTEM_PROMPT = """
     You can perform the following actions :
     - Update or create the ai_branch.
     - Write or update code or content of a given file and commit changes to ai_branch.
-    - Get the file content of a given file in a repository.
+    - See and Read the file content of a given file in a repository.
     - Get the repository information's (files and structure).
     - Create a merge request.
 

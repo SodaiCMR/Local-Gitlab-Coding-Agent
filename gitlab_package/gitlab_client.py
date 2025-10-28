@@ -168,7 +168,7 @@ class GitlabClient:
 
     def get_repo_file_content(self, file_path: str):
         """
-            Reads the content of the given file as a string.
+            Sees and reads the content of the given file as a string.
             Args:
                 file_path (str): The file path to the file in the repository.
             Returns:

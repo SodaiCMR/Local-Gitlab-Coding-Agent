@@ -7,14 +7,13 @@ import time
 import sys
 
 try_count, max_tries = 0, 20
-thinking_mode = True
 
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
 def agent_fix_issue(issue: str):
-    global try_count, thinking_mode
+    global try_count
     messages = []
     system_prompt = {
         "role": "system",
@@ -22,7 +21,7 @@ def agent_fix_issue(issue: str):
     }
     messages.append(system_prompt)
 
-    issue_id = int(str(issue).split(" ")[-1])
+    issue_id = int(issue.split(" ")[-1])
     msg = {"role":"user", "content":issue}
     messages.append(msg)
     while try_count <= max_tries:
@@ -36,7 +35,14 @@ def agent_fix_issue(issue: str):
                 client.get_repo_info,
                 client.get_repo_file_content,
             ],
-            # think=try_count == 0, # only use the thinking mode when establishing the plan
+            options={
+                "num_ctx": 32768,
+                "num_predict": 16384,
+                "think": True,
+                "temperature": 0.6,
+                "top_p": 0.95,
+                "top_k": 20,
+            },
         )
         try_count += 1
         if try_count == max_tries - 1:
@@ -44,8 +50,13 @@ def agent_fix_issue(issue: str):
 
         if content:= response.message.thinking:
             client.agent_comment_issue(issue_id, "Réflexion profonde...")
-            client.agent_comment_issue(issue_id, content)
-            messages.append({"role": "assistant", "content": content})
+            if try_count == 1:
+                client.agent_comment_issue(issue_id, content)
+                messages.append({"role": "assistant", "content": content})
+
+        if verbose_flag:
+            print(f"Prompt tokens: {response.prompt_eval_count}")
+            print(f"Response tokens: {response.eval_count}")
 
         if tools := response.message.tool_calls:
             for tool in tools:
@@ -85,5 +96,5 @@ if __name__ == "__main__":
             continue
         print(" === issue found === ")
         for issue in issues:
-            client.agent_comment_issue(int(str(issue).split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
+            client.agent_comment_issue(int(issue.split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
             agent_fix_issue(issue)
