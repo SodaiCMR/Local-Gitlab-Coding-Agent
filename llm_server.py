@@ -37,7 +37,7 @@ def agent_fix_issue(issue: str):
             ],
             options={
                 "num_ctx": 32768,
-                "num_predict": 16384,
+                "num_predict": 32000,
                 "think": True,
                 "temperature": 0.6,
                 "top_p": 0.95,
