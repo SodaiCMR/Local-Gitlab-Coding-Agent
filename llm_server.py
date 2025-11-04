@@ -1,5 +1,5 @@
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
-from gitlab_package.config import LLM_MODEL, SYSTEM_PROMPT
+from gitlab_package.config import LLM_MODEL, SYSTEM_PROMPT, OPTIONS
 from functions.call_function import call_function
 from gitlab.exceptions import GitlabGetError
 import ollama
@@ -7,13 +7,14 @@ import time
 import sys
 
 try_count, max_tries = 0, 20
+output_token = 0
 
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
 def agent_fix_issue(issue: str):
-    global try_count
+    global try_count, output_token
     messages = []
     system_prompt = {
         "role": "system",
@@ -35,28 +36,23 @@ def agent_fix_issue(issue: str):
                 client.get_repo_info,
                 client.get_repo_file_content,
             ],
-            options={
-                "num_ctx": 32768,
-                "num_predict": 32000,
-                "think": True,
-                "temperature": 0.6,
-                "top_p": 0.95,
-                "top_k": 20,
-            },
+            options=OPTIONS,
+            think= (try_count == 0)
         )
         try_count += 1
         if try_count == max_tries - 1:
             messages.append({"role": "assistant", "content": "reached max number of iterations. Stopping reasoning."})
 
-        if content:= response.message.thinking:
+        if thinking:= response.message.thinking:
             client.agent_comment_issue(issue_id, "Réflexion profonde...")
             if try_count == 1:
-                client.agent_comment_issue(issue_id, content)
-                messages.append({"role": "assistant", "content": content})
+                client.agent_comment_issue(issue_id, thinking)
+                messages.append({"role": "assistant", "thinking": thinking})
 
         if verbose_flag:
+            output_token += response.eval_count
             print(f"Prompt tokens: {response.prompt_eval_count}")
-            print(f"Response tokens: {response.eval_count}")
+            print(f"Response tokens: {output_token}")
 
         if tools := response.message.tool_calls:
             for tool in tools:
@@ -65,7 +61,8 @@ def agent_fix_issue(issue: str):
                 function_output = call_function(client, tool, verbose_flag)
                 tool_msg = {
                     "role": "tool",
-                    "content": f"function_name:{function_name} function_output:{function_output}"
+                    "tool_name": function_name,
+                    "content": f"function_output:{function_output}"
                 }
                 messages.append(tool_msg)
                 client.agent_comment_issue(issue_id, f"fetching {function_name} function output...")

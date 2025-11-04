@@ -27,14 +27,13 @@ SYSTEM_PROMPT = """
                 After all commits, open a merge request to the default branch and link it to the issue.
         Goal: one merge request that fully fixes the issue.
         
-    Important: Call tools only if necessary; if the answer can be produced directly, respond without tools.
-    Respond in French.
+    Important: 
+    Call tools only if necessary; if the answer can be produced directly, respond without tools.
     """
 LLM_MODEL = "qwen3:8b"
 OPTIONS = {
             "num_ctx": 32768,
             "num_predict": 32000,
-            "think": True,
             "temperature": 0.6,
             "top_p": 0.95,
             "top_k": 20,
