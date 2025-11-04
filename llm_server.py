@@ -87,11 +87,10 @@ if __name__ == "__main__":
     if client is None:
         sys.exit()
 
-    while True:
-        while not (issues:= look_for_issues(client)):
-            print('no issue found yet')
-            continue
-        print(" === issue found === ")
-        for issue in issues:
-            client.agent_comment_issue(int(issue.split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
-            agent_fix_issue(issue)
+    while not (issues:= look_for_issues(client)):
+        print('no issue found yet')
+        continue
+    print(" === issue found === ")
+    for issue in issues:
+        client.agent_comment_issue(int(issue.split(" ")[-1]), "Jetons un coup d'oeil au ticket👀...")
+        agent_fix_issue(issue)
