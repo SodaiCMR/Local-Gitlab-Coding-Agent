@@ -30,11 +30,7 @@ SYSTEM_PROMPT = """
     Important: 
     Call tools only if necessary; if the answer can be produced directly, respond without tools.
     """
-LLM_MODEL = "qwen3:8b"
+LLM_MODEL = "magistral:24b"
 OPTIONS = {
             "num_ctx": 32768,
-            "num_predict": 32000,
-            "temperature": 0.6,
-            "top_p": 0.95,
-            "top_k": 20,
         }
