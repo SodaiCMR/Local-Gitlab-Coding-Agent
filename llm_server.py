@@ -1,26 +1,23 @@
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
-from gitlab_package.config import LLM_MODEL, SYSTEM_PROMPT, OPTIONS
+from gitlab_package.config import LLM_MODEL, GITLAB_PROMPT, OPTIONS, SYSTEM_PROMPT
 from functions.call_function import call_function
 from gitlab.exceptions import GitlabGetError
 import ollama
 import time
 import sys
 
-try_count, max_tries = 0, 20
-output_token = 0
-
 verbose_flag = False
 if len(sys.argv) == 2 and sys.argv[-1] == "--verbose":
     verbose_flag = True
 
 def agent_fix_issue(issue: str):
-    global try_count, output_token
+    try_count, output_token, max_tries = 0, 0, 20
     messages = []
-    system_prompt = {
-        "role": "system",
-        "content":SYSTEM_PROMPT
-    }
-    messages.append(system_prompt)
+    system_prompt = [
+        {"role":"system", "content":SYSTEM_PROMPT},
+        {"role":"assistant", "content":GITLAB_PROMPT}
+    ]
+    messages.extend(system_prompt)
 
     issue_id = int(issue.split(" ")[-1])
     msg = {"role":"user", "content":issue}
