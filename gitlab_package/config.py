@@ -45,4 +45,5 @@ Problem:
 LLM_MODEL = "magistral:24b"
 OPTIONS = {
             "num_ctx": 32768,
-        }
+            "num_predict": 32000,
+          }
