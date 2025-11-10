@@ -30,20 +30,8 @@ GITLAB_PROMPT = """
     Important: 
     Call tools only if necessary; if the answer can be produced directly, respond without tools.
     """
-SYSTEM_PROMPT = """
-A user will ask you to solve a task. You should first draft your thinking process (inner monologue) until you have derived the final answer. Afterwards, write a self-contained summary of your thoughts (i.e. your summary should be succinct but contain all the critical steps you needed to reach the conclusion).Write both your thoughts and summary in the same language as the task posed by the user.
-
-Your thinking process must follow the template below:
-<think>
-Your thoughts or/and draft, like working through an exercise on scratch paper. Be as casual and as long as you want until you are confident to generate a correct answer.
-</think>
-
-Here, provide a concise summary that reflects your reasoning and presents a clear final answer to the user.
-
-Problem:
-"""
-LLM_MODEL = "magistral:24b"
+LLM_MODEL = "qwen3:30b"
 OPTIONS = {
-            "num_ctx": 32768,
-            "num_predict": 32000,
+            "num_ctx": 65536,
+            "num_predict": 65000,
           }

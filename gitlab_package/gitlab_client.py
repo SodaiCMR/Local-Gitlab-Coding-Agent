@@ -166,11 +166,11 @@ class GitlabClient:
 
         return repo_infos
 
-    def get_repo_file_content(self, file_path: str):
+    def read_file_content(self, file_path: str):
         """
-            Sees and reads the content of the given file as a string.
+            reads the content of the given file as a string.
             Args:
-                file_path (str): The file path to the file in the repository.
+                file_path (str): The file path to read.
             Returns:
                 str: The content of the given file path
         """

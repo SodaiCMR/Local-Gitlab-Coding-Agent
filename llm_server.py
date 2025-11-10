@@ -1,5 +1,5 @@
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
-from gitlab_package.config import LLM_MODEL, GITLAB_PROMPT, OPTIONS, SYSTEM_PROMPT
+from gitlab_package.config import LLM_MODEL, GITLAB_PROMPT, OPTIONS
 from functions.call_function import call_function
 from gitlab.exceptions import GitlabGetError
 import ollama
@@ -14,8 +14,7 @@ def agent_fix_issue(issue: str):
     try_count, output_token, max_tries = 0, 0, 20
     messages = []
     system_prompt = [
-        {"role":"system", "content":SYSTEM_PROMPT},
-        {"role":"assistant", "content":GITLAB_PROMPT}
+        {"role":"assistant", "content":GITLAB_PROMPT},
     ]
     messages.extend(system_prompt)
 
@@ -31,7 +30,7 @@ def agent_fix_issue(issue: str):
                 client.create_commit,
                 client.create_merge_request,
                 client.get_repo_info,
-                client.get_repo_file_content,
+                client.read_file_content,
             ],
             options=OPTIONS,
             think= (try_count == 0)
