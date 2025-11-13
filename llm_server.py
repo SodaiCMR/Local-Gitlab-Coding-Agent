@@ -1,7 +1,6 @@
 from gitlab_package.gitlab_client import GitlabClient, look_for_issues
 from gitlab_package.config import LLM_MODEL, GITLAB_PROMPT, OPTIONS
 from functions.call_function import call_function
-from gitlab.exceptions import GitlabGetError
 import ollama
 import time
 import sys
@@ -14,7 +13,7 @@ def agent_fix_issue(issue: str):
     try_count, output_token, max_tries = 0, 0, 20
     messages = []
     system_prompt = [
-        {"role":"assistant", "content":GITLAB_PROMPT},
+        {"role":"system", "content":GITLAB_PROMPT},
     ]
     messages.extend(system_prompt)
 
@@ -33,15 +32,14 @@ def agent_fix_issue(issue: str):
                 client.read_file_content,
             ],
             options=OPTIONS,
-            think= (try_count == 0)
+            think=True
         )
-        try_count += 1
         if try_count == max_tries - 1:
             messages.append({"role": "assistant", "content": "reached max number of iterations. Stopping reasoning."})
 
         if thinking:= response.message.thinking:
-            client.agent_comment_issue(issue_id, "Réflexion profonde...")
-            if try_count == 1:
+            client.agent_comment_issue(issue_id, "Réflexion...")
+            if try_count == 0:
                 client.agent_comment_issue(issue_id, thinking)
                 messages.append({"role": "assistant", "thinking": thinking})
 
@@ -61,13 +59,14 @@ def agent_fix_issue(issue: str):
                     "content": f"function_output:{function_output}"
                 }
                 messages.append(tool_msg)
-                client.agent_comment_issue(issue_id, f"fetching {function_name} function output...")
         else:
             content = getattr(response.message, "content", None)
             if content and str(content).strip():
                 client.agent_comment_issue(issue_id, response.message.content)
             client.issues_list[f"issue{issue_id}"]['state'] = "fixed"
             break
+
+        try_count += 1
     return
 
 if __name__ == "__main__":
