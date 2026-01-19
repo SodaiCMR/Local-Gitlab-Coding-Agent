@@ -1,0 +1,4 @@
+ollama
+python-gitlab
+python-dotenv
+

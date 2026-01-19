@@ -32,8 +32,3 @@ GITLAB_PROMPT = """
     Afterwards, write a self-contained summary of your thoughts (i.e. your summary should be succinct but contain all the critical steps you needed to reach the conclusion)
     Write both your thoughts and summary in the same language as the task posed by the user.
     """
-LLM_MODEL = "qwen3:30b"
-OPTIONS = {
-            "num_ctx": 65536,
-            "num_predict": 65000,
-          }
