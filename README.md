@@ -33,7 +33,6 @@ GITLAB_PROJECT_ID="<your_project_id>"
     ```bash
     pip install -r requirements.txt
     ```
-    *(Note: You might need to create a `requirements.txt` file containing `python-gitlab`, `ollama`, `python-dotenv` if not present)*
 
 3.  **Install Ollama:**
     Ensure [Ollama](https://ollama.com/) is installed and running on your machine.
@@ -41,10 +40,11 @@ GITLAB_PROJECT_ID="<your_project_id>"
     ```bash
     ollama pull qwen2.5:14b
     ```
+    *Important: The model you use must be capable of tool usage (function calling).*
 
 ## Usage
 
-Run the `llm_server.py` script with the required headers.
+Run the `main.py` script with the required argument.
 
 ### Command Line Arguments
 
@@ -56,7 +56,7 @@ Run the `llm_server.py` script with the required headers.
 ### Example Run
 
 ```bash
-python llm_server.py --model qwen2.5:14b --ctx 32768 --predict 8192 --verbose
+python main.py --model qwen2.5:14b --ctx 32768 --predict 8192 --verbose
 ```
 
 ## How it works
@@ -67,3 +67,6 @@ python llm_server.py --model qwen2.5:14b --ctx 32768 --predict 8192 --verbose
 4.  It modifies the code on a new branch `ai_branch_issue<id>`.
 5.  Finally, it submits a Merge Request.
 
+## Contributing
+
+Feel free contributing to improve this tool!

@@ -1,6 +1,6 @@
-from gitlab_package.gitlab_client import GitlabClient, look_for_issues
-from gitlab_package.config import GITLAB_PROMPT
-from functions.call_function import call_function
+from services.gitlab_service import GitlabClient, look_for_issues
+from services.config import GITLAB_PROMPT
+from tools.dispatcher import call_function
 import ollama
 import time
 import sys
